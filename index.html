@@ -1,0 +1,2636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Career Growth Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f13;
+  --surface: #16161d;
+  --card: #1c1c26;
+  --border: #2a2a38;
+  --accent: #7c6af7;
+  --accent2: #5ec4a8;
+  --accent3: #f2a65a;
+  --accent4: #e06b8b;
+  --text: #e8e8f0;
+  --muted: #6b6b82;
+  --subtle: #2e2e3e;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* LOADING SCREEN */
+#loading-screen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 9999;
+  gap: 20px;
+  transition: opacity 0.5s ease;
+}
+#loading-screen .load-logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2rem;
+  color: var(--accent);
+  letter-spacing: -0.5px;
+}
+#loading-screen .load-sub {
+  color: var(--muted);
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.load-bar-wrap {
+  width: 200px; height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.load-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 2px;
+  animation: loadBar 1.4s ease forwards;
+}
+@keyframes loadBar { from { width: 0 } to { width: 100% } }
+
+/* SIDEBAR */
+#sidebar {
+  width: 220px; min-width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  height: 100vh; overflow-y: auto;
+  position: fixed; left: 0; top: 0; bottom: 0;
+  z-index: 100;
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.sidebar-logo {
+  padding: 20px 18px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo .logo-text {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.1rem;
+  color: var(--accent);
+  line-height: 1.2;
+}
+.sidebar-logo .logo-sub {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 3px;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-section-label {
+  padding: 14px 18px 6px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 18px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text); background: var(--subtle); }
+.nav-item.active { color: var(--text); background: var(--subtle); border-left-color: var(--accent); }
+.nav-item .nav-icon { font-size: 0.9rem; width: 18px; text-align: center; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.sidebar-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+  width: 100%;
+}
+.sidebar-btn:hover { border-color: var(--accent); color: var(--text); }
+
+.save-indicator {
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--accent2);
+  min-height: 18px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.save-indicator.show { opacity: 1; }
+
+/* MAIN CONTENT */
+#main {
+  margin-left: 220px;
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 28px 32px;
+}
+#main::-webkit-scrollbar { width: 6px; }
+#main::-webkit-scrollbar-track { background: transparent; }
+#main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.page-header {
+  margin-bottom: 24px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.page-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.75rem;
+  color: var(--text);
+  line-height: 1.1;
+}
+.page-subtitle { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+
+/* STAT CARDS */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.stat-card.c1::before { background: var(--accent); }
+.stat-card.c2::before { background: var(--accent2); }
+.stat-card.c3::before { background: var(--accent3); }
+.stat-card.c4::before { background: var(--accent4); }
+.stat-val { font-family: 'DM Serif Display', serif; font-size: 2rem; line-height: 1; margin-bottom: 4px; }
+.stat-card.c1 .stat-val { color: var(--accent); }
+.stat-card.c2 .stat-val { color: var(--accent2); }
+.stat-card.c3 .stat-val { color: var(--accent3); }
+.stat-card.c4 .stat-val { color: var(--accent4); }
+.stat-label { font-size: 0.75rem; color: var(--muted); }
+
+/* GRID LAYOUTS */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+
+/* CARD */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+/* BUTTON */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #9080fa; }
+.btn-sm { padding: 5px 10px; font-size: 0.75rem; border-radius: 5px; }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--text); }
+
+/* PROGRESS BAR */
+.progress-wrap { background: var(--subtle); border-radius: 99px; height: 6px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+
+/* TAG / BADGE */
+.tag {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.tag-accent { background: rgba(124,106,247,0.15); color: var(--accent); }
+.tag-accent2 { background: rgba(94,196,168,0.15); color: var(--accent2); }
+.tag-accent3 { background: rgba(242,166,90,0.15); color: var(--accent3); }
+.tag-accent4 { background: rgba(224,107,139,0.15); color: var(--accent4); }
+.tag-muted { background: var(--subtle); color: var(--muted); }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 500;
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%; max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.modal::-webkit-scrollbar { width: 4px; }
+.modal::-webkit-scrollbar-thumb { background: var(--border); }
+.modal-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.25rem;
+  margin-bottom: 18px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-close {
+  background: none; border: none; color: var(--muted);
+  font-size: 1.2rem; cursor: pointer; padding: 0;
+  transition: color 0.15s;
+}
+.modal-close:hover { color: var(--text); }
+
+/* FORM */
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 9px 12px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none; border-color: var(--accent);
+}
+.form-select option { background: var(--card); }
+.form-textarea { resize: vertical; min-height: 80px; }
+
+/* ENTRY ITEMS */
+.entry-item {
+  background: var(--subtle);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex; align-items: flex-start; gap: 10px;
+  position: relative;
+}
+.entry-item .entry-body { flex: 1; min-width: 0; }
+.entry-item .entry-title { font-size: 0.85rem; font-weight: 500; margin-bottom: 3px; }
+.entry-item .entry-meta { font-size: 0.72rem; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.entry-actions {
+  display: flex; gap: 4px;
+  opacity: 0; transition: opacity 0.15s;
+}
+.entry-item:hover .entry-actions { opacity: 1; }
+.act-btn {
+  background: none; border: none;
+  color: var(--muted); cursor: pointer;
+  font-size: 0.75rem; padding: 2px 5px;
+  border-radius: 4px; transition: all 0.1s;
+}
+.act-btn:hover { color: var(--text); background: var(--border); }
+.act-btn.del:hover { color: var(--accent4); }
+
+/* AVATAR */
+.avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+
+/* KANBAN */
+.kanban-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 800px) { .kanban-wrap { grid-template-columns: 1fr; } }
+.kanban-col {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+}
+.kanban-col-header {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.kanban-card {
+  background: var(--subtle);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  position: relative;
+}
+.kanban-card .kc-title { font-size: 0.83rem; font-weight: 500; margin-bottom: 6px; }
+.kanban-card .kc-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; align-items: center; }
+.kanban-card .kc-actions { position: absolute; top: 8px; right: 8px; opacity: 0; transition: opacity 0.15s; }
+.kanban-card:hover .kc-actions { opacity: 1; }
+
+/* DATE BOX */
+.date-box {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 6px;
+  width: 42px; min-width: 42px;
+  text-align: center;
+  padding: 4px;
+  font-size: 0.65rem;
+  line-height: 1.1;
+}
+.date-box .d-num { font-family: 'DM Serif Display', serif; font-size: 1.2rem; display: block; }
+
+/* WINS COLUMNS */
+.wins-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media (max-width: 800px) { .wins-grid { grid-template-columns: 1fr; } }
+.win-card {
+  background: var(--subtle);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 12px 12px 16px;
+  margin-bottom: 8px;
+  position: relative;
+  border-left-width: 3px;
+}
+.win-card .wc-title { font-size: 0.83rem; font-weight: 500; margin-bottom: 4px; }
+.win-card .wc-meta { font-size: 0.72rem; color: var(--muted); }
+.win-card .wc-actions { position: absolute; top: 8px; right: 8px; opacity: 0; transition: opacity 0.15s; }
+.win-card:hover .wc-actions { opacity: 1; }
+
+/* VISIBILITY CHART */
+.vis-chart { display: flex; flex-direction: column; gap: 8px; }
+.vis-bar-row { display: flex; align-items: center; gap: 10px; }
+.vis-bar-label { font-size: 0.72rem; color: var(--muted); width: 160px; flex-shrink: 0; }
+.vis-bar-outer { flex: 1; background: var(--border); border-radius: 99px; height: 8px; overflow: hidden; }
+.vis-bar-inner { height: 100%; background: var(--accent); border-radius: 99px; }
+.vis-bar-count { font-size: 0.72rem; color: var(--muted); width: 20px; text-align: right; }
+
+/* SKILLS */
+.skill-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.skill-label { font-size: 0.8rem; width: 200px; flex-shrink: 0; }
+.skill-pct { font-size: 0.72rem; color: var(--muted); width: 32px; text-align: right; }
+
+/* CAREER LADDER */
+.ladder-wrap {
+  display: flex; gap: 0;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+.ladder-wrap::-webkit-scrollbar { height: 4px; }
+.ladder-wrap::-webkit-scrollbar-thumb { background: var(--border); }
+.ladder-step {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 140px;
+}
+.ladder-step::after {
+  content: '→';
+  position: absolute; right: -12px; top: 18px;
+  color: var(--muted);
+  font-size: 1rem;
+}
+.ladder-step:last-child::after { display: none; }
+.ls-node {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--subtle);
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+.ls-node.active { border-color: var(--accent); background: rgba(124,106,247,0.15); }
+.ls-node.dream { border-color: var(--accent3); background: rgba(242,166,90,0.15); }
+.ls-title { font-size: 0.72rem; font-weight: 500; text-align: center; line-height: 1.3; }
+.ls-time { font-size: 0.65rem; color: var(--muted); margin-top: 3px; text-align: center; }
+
+/* PHASE CARDS */
+.phase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 800px) { .phase-grid { grid-template-columns: 1fr; } }
+.phase-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.phase-header {
+  padding: 14px 16px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  user-select: none;
+}
+.phase-badge {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.phase-header-text { flex: 1; }
+.phase-name { font-size: 0.85rem; font-weight: 600; }
+.phase-time { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+.phase-chevron { color: var(--muted); font-size: 0.7rem; transition: transform 0.2s; }
+.phase-card.open .phase-chevron { transform: rotate(180deg); }
+.phase-progress-bar { padding: 0 16px 10px; }
+.phase-body { padding: 0 16px 14px; display: none; }
+.phase-card.open .phase-body { display: block; }
+.phase-celebration {
+  background: rgba(94,196,168,0.1);
+  border: 1px solid var(--accent2);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 0.78rem;
+  color: var(--accent2);
+  text-align: center;
+  margin-bottom: 10px;
+  display: none;
+}
+
+.task-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  group: true;
+}
+.task-item:last-of-type { border-bottom: none; }
+.task-cb { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--border); cursor: pointer; flex-shrink: 0; margin-top: 2px; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+.task-cb.checked { border-color: transparent; }
+.task-cb.checked::after { content: '✓'; font-size: 0.6rem; color: #fff; }
+.task-text { flex: 1; font-size: 0.78rem; line-height: 1.5; color: var(--text); }
+.task-text.done { text-decoration: line-through; color: var(--muted); }
+.task-edit-input { flex: 1; font-size: 0.78rem; background: var(--subtle); border: 1px solid var(--accent); border-radius: 4px; padding: 2px 6px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; }
+.task-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
+.task-item:hover .task-actions { opacity: 1; }
+
+/* JOURNEY PROGRESS */
+.journey-bar-wrap {
+  position: relative;
+  margin: 16px 0;
+}
+.journey-labels {
+  display: flex; justify-content: space-between;
+  font-size: 0.68rem; color: var(--muted);
+  margin-bottom: 6px;
+}
+.journey-segments {
+  display: flex; height: 10px; border-radius: 99px; overflow: hidden; gap: 2px;
+}
+.journey-seg { flex: 1; border-radius: 3px; }
+
+/* ERG */
+.erg-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media (max-width: 800px) { .erg-grid { grid-template-columns: 1fr; } }
+.erg-col { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.erg-col-head { font-size: 0.8rem; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 7px; }
+.erg-card {
+  background: var(--subtle); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; margin-bottom: 8px; position: relative;
+}
+.erg-card .ec-title { font-size: 0.83rem; font-weight: 500; margin-bottom: 6px; }
+.erg-card .ec-outcome { font-size: 0.73rem; color: var(--muted); margin-bottom: 6px; font-style: italic; }
+.erg-card .ec-meta { display: flex; gap: 6px; flex-wrap: wrap; font-size: 0.7rem; }
+.erg-card .ec-actions { position: absolute; top: 8px; right: 8px; opacity: 0; transition: opacity 0.15s; }
+.erg-card:hover .ec-actions { opacity: 1; }
+
+/* NETWORK */
+.net-section { margin-bottom: 20px; }
+.net-section-title { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.net-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+.net-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px;
+  display: flex; gap: 10px; align-items: flex-start;
+  position: relative;
+}
+.net-card:hover .nc-actions { opacity: 1; }
+.nc-actions { position: absolute; top: 8px; right: 8px; opacity: 0; transition: opacity 0.15s; display: flex; gap: 3px; }
+.nc-name { font-size: 0.83rem; font-weight: 500; }
+.nc-title { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+.nc-meta { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* TIP CARD */
+.tip-card {
+  background: rgba(124,106,247,0.06);
+  border: 1px solid rgba(124,106,247,0.2);
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.tip-card .tip-title {
+  font-size: 0.75rem; font-weight: 600; color: var(--accent);
+  letter-spacing: 0.05em; text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+/* NICHE CARD */
+.niche-card {
+  background: linear-gradient(135deg, rgba(124,106,247,0.1), rgba(94,196,168,0.08));
+  border: 1px solid rgba(124,106,247,0.3);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.niche-card .niche-label { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; font-weight: 600; }
+.niche-card .niche-text {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.3rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+/* CERT CARD */
+.cert-card {
+  background: var(--subtle); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; margin-bottom: 8px; position: relative;
+}
+.cert-card:hover .cert-actions { opacity: 1; }
+.cert-actions { position: absolute; top: 8px; right: 8px; opacity: 0; transition: opacity 0.15s; display: flex; gap: 3px; }
+.cert-name { font-size: 0.83rem; font-weight: 500; margin-bottom: 3px; }
+.cert-meta { font-size: 0.72rem; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+
+/* INLINE EDIT */
+.editable-field {
+  cursor: text;
+  border-radius: 3px;
+  transition: background 0.1s;
+}
+.editable-field:hover { background: var(--subtle); }
+
+/* CONSULTING IP */
+.ip-section { margin-bottom: 20px; }
+.ip-section-title { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+.ip-card {
+  background: var(--subtle); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; margin-bottom: 8px; position: relative;
+}
+.ip-card:hover .ip-actions { opacity: 1; }
+.ip-actions { position: absolute; top: 8px; right: 8px; opacity: 0; transition: opacity 0.15s; display: flex; gap: 3px; }
+.ip-title { font-size: 0.83rem; font-weight: 500; margin-bottom: 4px; }
+.ip-meta { font-size: 0.72rem; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.ip-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+
+/* IMPACT LOG */
+.impact-two { display: grid; grid-template-columns: 1fr 360px; gap: 16px; }
+@media (max-width: 900px) { .impact-two { grid-template-columns: 1fr; } }
+.reframe-card {
+  background: rgba(94,196,168,0.06);
+  border: 1px solid rgba(94,196,168,0.2);
+  border-radius: 8px; padding: 14px; margin-top: 14px;
+}
+.reframe-card .rc-title { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--accent2); margin-bottom: 8px; }
+.reframe-prompt { font-size: 0.78rem; color: var(--muted); padding: 5px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+.reframe-prompt:last-child { border-bottom: none; }
+.impact-entry {
+  background: var(--subtle); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; margin-bottom: 8px; position: relative;
+}
+.impact-entry:hover .ie-actions { opacity: 1; }
+.ie-actions { position: absolute; top: 8px; right: 8px; opacity: 0; transition: opacity 0.15s; display: flex; gap: 3px; }
+.ie-outcome { font-size: 0.83rem; font-weight: 500; margin-bottom: 4px; }
+.ie-review { font-size: 0.75rem; color: var(--accent3); margin-bottom: 6px; font-style: italic; }
+.ie-meta { font-size: 0.7rem; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* COL BADGE */
+.col-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--subtle); font-size: 0.7rem; color: var(--muted); font-weight: 600; }
+
+/* Degree tracker */
+.deg-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 800px) { .deg-two { grid-template-columns: 1fr; } }
+
+/* Scrollable sections */
+.scroll-list { max-height: 320px; overflow-y: auto; }
+.scroll-list::-webkit-scrollbar { width: 3px; }
+.scroll-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* Impact suggestion cards */
+.impact-suggestion-card { transition: opacity 0.3s, border-color 0.3s; }
+.impact-suggestion-card:hover { border-color: rgba(124,106,247,0.4) !important; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin-dot { display: inline-block; animation: spin 1s linear infinite; }
+
+/* RECOGNITION WALL */
+.rw-card{background:var(--subtle);border-radius:12px;padding:14px;border:1px solid var(--border);position:relative;transition:border-color .2s}
+.rw-card:hover{border-color:var(--accent)}
+.rw-who{font-size:13px;font-weight:700;color:var(--text)}
+.rw-role{font-size:11px;color:var(--muted);margin-top:1px}
+.rw-msg{font-size:12px;color:var(--text);margin-top:8px;line-height:1.6;font-style:italic;border-left:2px solid var(--accent);padding-left:8px}
+.rw-meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;align-items:center}
+.rw-del{position:absolute;top:10px;right:12px;cursor:pointer;color:var(--muted);font-size:12px}
+.rw-del:hover{color:var(--accent4)}
+
+/* MULTI-SELECT TAGS */
+.ms-wrap{display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:var(--subtle);border:1px solid var(--border);border-radius:8px;min-height:40px}
+.ms-wrap:focus-within{border-color:var(--accent)}
+.ms-opt{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);color:var(--muted);background:var(--card);user-select:none;transition:all .15s}
+.ms-opt:hover{border-color:var(--accent);color:var(--accent)}
+.ms-opt.sel{border-color:var(--accent);background:rgba(124,106,247,.15);color:var(--accent)}
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loading-screen">
+  <div class="load-logo">Career Growth Dashboard</div>
+  <div class="load-sub">Loading your journey...</div>
+  <div class="load-bar-wrap"><div class="load-bar-inner"></div></div>
+</div>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Career Growth</div>
+    <div class="logo-sub">Executive Assistant → OD/EX Consultant</div>
+  </div>
+
+  <div class="sidebar-section-label">Overview</div>
+  <div class="nav-item active" data-page="dashboard">
+    <span class="nav-icon">◎</span> Dashboard
+  </div>
+
+  <div class="sidebar-section-label">Tracking</div>
+  <div class="nav-item" data-page="accomplishments"><span class="nav-icon">★</span> Accomplishments</div>
+  <div class="nav-item" data-page="projects"><span class="nav-icon">◈</span> Projects</div>
+  <div class="nav-item" data-page="stakeholders"><span class="nav-icon">◉</span> Stakeholders</div>
+  <div class="nav-item" data-page="meetings"><span class="nav-icon">◷</span> Meetings & Events</div>
+
+  <div class="sidebar-section-label">Growth</div>
+  <div class="nav-item" data-page="visibility"><span class="nav-icon">◬</span> Visibility</div>
+  <div class="nav-item" data-page="skills"><span class="nav-icon">◌</span> Skills & Roadmap</div>
+
+  <div class="sidebar-section-label">My Lab</div>
+  <div class="nav-item" data-page="erg"><span class="nav-icon">⬡</span> ERG Programs</div>
+  <div class="nav-item" data-page="impact"><span class="nav-icon">◆</span> Impact Log</div>
+  <div class="nav-item" data-page="network"><span class="nav-icon">◎</span> Network</div>
+  <div class="nav-item" data-page="consulting"><span class="nav-icon">◈</span> Consulting IP</div>
+
+  <div class="sidebar-footer">
+    <div class="save-indicator" id="save-indicator">✓ Saved</div>
+    <button class="sidebar-btn" onclick="exportBackup()">⬇ Export Backup</button>
+    <button class="sidebar-btn" onclick="document.getElementById('import-file').click()">⬆ Import Backup</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(event)">
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main id="main">
+
+<!-- PAGE: DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Good to see you.</div>
+      <div class="page-subtitle">Here's where you stand today — keep building.</div>
+    </div>
+  </div>
+
+  <div class="stats-grid" id="dash-stats">
+    <div class="stat-card c1"><div class="stat-val" id="ds-projects">0</div><div class="stat-label">Projects Completed</div></div>
+    <div class="stat-card c2"><div class="stat-val" id="ds-erg">0</div><div class="stat-label">ERG Programs Executed</div></div>
+    <div class="stat-card c3"><div class="stat-val" id="ds-impact">0</div><div class="stat-label">Impact Entries Logged</div></div>
+    <div class="stat-card c4"><div class="stat-val" id="ds-vis">0</div><div class="stat-label">Visibility Moments</div></div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Active Projects <span style="color:var(--muted);font-size:0.7rem;font-weight:400;text-transform:none">top 3</span></div>
+      <div id="dash-projects"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Recent Accomplishments <span style="color:var(--muted);font-size:0.7rem;font-weight:400;text-transform:none">top 3</span></div>
+      <div id="dash-acc-preview"></div>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Upcoming Events</div>
+      <div id="dash-events"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Skills Progress</div>
+      <div id="dash-skills"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: ACCOMPLISHMENTS -->
+<div class="page" id="page-accomplishments">
+  <div class="page-header">
+    <div><div class="page-title">Accomplishments</div><div class="page-subtitle">Every win documented is leverage for what's next.</div></div>
+    <button class="btn btn-primary" onclick="openModal('modal-acc')">+ Add Accomplishment</button>
+  </div>
+  <div id="acc-list"></div>
+</div>
+
+<!-- PAGE: PROJECTS -->
+<div class="page" id="page-projects">
+  <div class="page-header">
+    <div><div class="page-title">Projects</div><div class="page-subtitle">What you're building, and where it's going.</div></div>
+    <button class="btn btn-primary" onclick="openModal('modal-proj')">+ Add Project</button>
+  </div>
+  <div class="kanban-wrap">
+    <div class="kanban-col">
+      <div class="kanban-col-header"><span style="color:var(--accent3)">●</span> In Progress <span class="col-badge" id="proj-ip-count">0</span></div>
+      <div id="proj-inprogress"></div>
+    </div>
+    <div class="kanban-col">
+      <div class="kanban-col-header"><span style="color:var(--muted)">●</span> Planned <span class="col-badge" id="proj-pl-count">0</span></div>
+      <div id="proj-planned"></div>
+    </div>
+    <div class="kanban-col">
+      <div class="kanban-col-header"><span style="color:var(--accent2)">●</span> Completed <span class="col-badge" id="proj-co-count">0</span></div>
+      <div id="proj-completed"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: STAKEHOLDERS -->
+<div class="page" id="page-stakeholders">
+  <div class="page-header">
+    <div><div class="page-title">Stakeholders</div><div class="page-subtitle">Relationships are your infrastructure. Map them intentionally.</div></div>
+    <button class="btn btn-primary" onclick="openModal('modal-stake')">+ Add Stakeholder</button>
+  </div>
+  <div id="stake-list"></div>
+</div>
+
+<!-- PAGE: MEETINGS & EVENTS -->
+<div class="page" id="page-meetings">
+  <div class="page-header">
+    <div><div class="page-title">Meetings & Events</div><div class="page-subtitle">Log every room you're in. It adds up faster than you think.</div></div>
+    <button class="btn btn-primary" onclick="openModal('modal-meet')">+ Add Event</button>
+  </div>
+  <div class="two-col">
+    <div>
+      <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:10px;">Upcoming</div>
+      <div id="meet-upcoming"></div>
+    </div>
+    <div>
+      <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:10px;">Past</div>
+      <div id="meet-past"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: WINS TRACKER -->
+<!-- PAGE: VISIBILITY -->
+<div class="page" id="page-visibility">
+  <div class="page-header">
+    <div><div class="page-title">Visibility Tracker</div><div class="page-subtitle">Be seen for the work you're already doing.</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" style="background:linear-gradient(135deg,rgba(242,166,90,.2),rgba(224,107,139,.2));color:var(--accent3);border:1px solid rgba(242,166,90,.3)" onclick="openModal('modal-rec')">🌟 Recognition</button>
+      <button class="btn btn-primary" onclick="openModal('modal-vis')">+ Log Visibility Moment</button>
+    </div>
+  </div>
+  <div class="two-col">
+    <div>
+      <div class="card">
+        <div class="card-title">Visibility Log <span class="tag tag-accent" id="vis-total-badge">0</span></div>
+        <div id="vis-list" class="scroll-list"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">Breakdown by Type</div>
+        <div id="vis-chart" class="vis-chart"></div>
+      </div>
+      <div class="tip-card" style="margin-top:14px;">
+        <div class="tip-title">💡 Visibility Strategy</div>
+        Every ERG presentation is a visibility moment. Every internal post counts. Every cross-functional meeting where you speak up — log it. Visibility is not self-promotion. It's evidence that you exist in the rooms where decisions get made.
+      </div>
+    </div>
+  </div>
+
+  <!-- RECOGNITION WALL -->
+  <div style="font-size:0.75rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin:28px 0 10px;display:flex;align-items:center;gap:8px;">
+    Recognition Wall
+    <span style="font-size:0.7rem;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:400">— what others gave you</span>
+  </div>
+  <div class="card" style="margin-bottom:14px;background:linear-gradient(135deg,rgba(242,166,90,.07),rgba(224,107,139,.05));border-color:rgba(242,166,90,.2)">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text)">🌟 Your reputation, documented in real time</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px">Every shoutout, TrueBlue, compliment, and referral — captured with context so you never forget who saw your value and where it happened.</div>
+      </div>
+      <div style="display:flex;gap:20px;text-align:center">
+        <div><div style="font-size:20px;font-weight:700;color:var(--accent3)" id="rec-total">0</div><div style="font-size:10px;color:var(--muted)">Total</div></div>
+        <div><div style="font-size:20px;font-weight:700;color:var(--accent)" id="rec-tb">0</div><div style="font-size:10px;color:var(--muted)">TrueBlue</div></div>
+        <div><div style="font-size:20px;font-weight:700;color:var(--accent2)" id="rec-lead">0</div><div style="font-size:10px;color:var(--muted)">Leadership</div></div>
+      </div>
+    </div>
+  </div>
+  <div id="rec-wall">
+    <div style="padding:32px;background:var(--card);border:1px solid var(--border);border-radius:14px;text-align:center;color:var(--muted);font-size:0.82rem;">
+      <div style="font-size:28px;margin-bottom:10px">🌟</div>
+      Log your first recognition moment — a TrueBlue, a shoutout, a compliment that mattered
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: SKILLS & ROADMAP -->
+<div class="page" id="page-skills">
+  <div class="page-header">
+    <div><div class="page-title">Skills & Roadmap</div><div class="page-subtitle">Five years. One destination. Here's the map.</div></div>
+  </div>
+
+  <div class="two-col" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-title">My Certifications <button class="btn btn-ghost btn-sm" onclick="openModal('modal-cert')" style="padding:3px 8px;font-size:0.7rem;">+ Add</button></div>
+      <div id="certs-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Transferable Skills <button class="btn btn-ghost btn-sm" onclick="openModal('modal-skill')" style="padding:3px 8px;font-size:0.7rem;">+ Add Skill</button></div>
+      <div id="skills-bars"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">Career Ladder</div>
+    <div class="ladder-wrap" id="career-ladder"></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">Overall Journey Progress</div>
+    <div class="journey-labels">
+      <span>Start</span><span>Year 1</span><span>Year 2</span><span>Year 3</span><span>Year 4</span><span>Year 5 🎯</span>
+    </div>
+    <div class="journey-segments" id="journey-bar"></div>
+  </div>
+
+  <div class="phase-grid" id="phase-grid"></div>
+</div>
+
+<!-- PAGE: ERG PROGRAMS -->
+<div class="page" id="page-erg">
+  <div class="page-header">
+    <div><div class="page-title">ERG Programs</div><div class="page-subtitle">BOND — Black Organization for Networking and Development</div></div>
+    <button class="btn btn-primary" onclick="openModal('modal-erg')">+ Add Program</button>
+  </div>
+
+  <div class="stats-grid" style="margin-bottom:20px;">
+    <div class="stat-card c1"><div class="stat-val" id="erg-total">0</div><div class="stat-label">Total Programs</div></div>
+    <div class="stat-card c4"><div class="stat-val" id="erg-vis">0</div><div class="stat-label">Visibility</div></div>
+    <div class="stat-card c2"><div class="stat-val" id="erg-dev">0</div><div class="stat-label">Development</div></div>
+    <div class="stat-card c3"><div class="stat-val" id="erg-tb">0</div><div class="stat-label">Trust & Belonging</div></div>
+  </div>
+
+  <div class="tip-card" style="margin-bottom:16px;">
+    <div class="tip-title">🧪 Your ERG = Your Consulting Lab</div>
+    Write the intended outcome BEFORE planning a single logistic. "People will feel..." not "We will do..." The outcome statement is the thing. The event is just how you deliver it.
+  </div>
+
+  <div class="erg-grid">
+    <div class="erg-col">
+      <div class="erg-col-head"><span>👁</span> Visibility</div>
+      <div id="erg-vis-col"></div>
+    </div>
+    <div class="erg-col">
+      <div class="erg-col-head"><span>📈</span> Development</div>
+      <div id="erg-dev-col"></div>
+    </div>
+    <div class="erg-col">
+      <div class="erg-col-head"><span>🤝</span> Trust & Belonging</div>
+      <div id="erg-tb-col"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: IMPACT LOG -->
+<div class="page" id="page-impact">
+  <div class="page-header">
+    <div><div class="page-title">Impact Log</div><div class="page-subtitle">AI-reframed from your accomplishments, projects, and ERG programs — no double entry.</div></div>
+    <button class="btn btn-primary" id="gen-all-btn" onclick="generateAllImpact()">✦ Generate from My Work</button>
+  </div>
+
+  <div class="tip-card" style="margin-bottom:16px;display:flex;gap:14px;align-items:flex-start;">
+    <div style="font-size:1.5rem;line-height:1">✦</div>
+    <div>
+      <div class="tip-title">How this works</div>
+      This page reads everything you've entered in Accomplishments, Projects, and ERG Programs — then uses AI to reframe each one in outcome language with performance review wording. Click <strong style="color:var(--text)">Generate from My Work</strong> to pull in anything new. Review the suggestions and save the ones that feel right. Nothing gets added without your approval.
+    </div>
+  </div>
+
+  <!-- GENERATOR QUEUE -->
+  <div id="impact-queue-wrap" style="display:none;margin-bottom:20px;">
+    <div style="font-size:0.75rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+      <span>Suggested Reframes <span id="queue-count-badge" class="tag tag-accent" style="margin-left:6px">0</span></span>
+      <button class="btn btn-ghost btn-sm" onclick="saveAllSuggestions()">Save All</button>
+    </div>
+    <div id="impact-queue"></div>
+  </div>
+
+  <div id="impact-empty-queue" style="display:none;margin-bottom:20px;">
+    <div class="card" style="text-align:center;padding:28px;color:var(--muted);font-size:0.85rem;">
+      Everything is up to date — no new items to reframe. Add more accomplishments, projects, or ERG programs and click Generate again.
+    </div>
+  </div>
+
+  <!-- SAVED LOG -->
+  <div class="impact-two">
+    <div>
+      <div style="font-size:0.75rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Saved Impact Entries <span id="impact-saved-count" class="col-badge" style="margin-left:4px">0</span></div>
+      <div id="impact-list"></div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">Breakdown by Category</div>
+        <div id="impact-chart" class="vis-chart"></div>
+      </div>
+      <div class="reframe-card" style="margin-top:14px;">
+        <div class="rc-title">What the AI is doing</div>
+        <div class="reframe-prompt">Translating task language → outcome language</div>
+        <div class="reframe-prompt">Identifying who was affected and how</div>
+        <div class="reframe-prompt">Framing your work the way a consultant would bill for it</div>
+        <div class="reframe-prompt">Generating performance review–ready wording you can copy directly</div>
+        <div class="reframe-prompt">Mapping each entry to an EX/OD/culture impact category</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: NETWORK -->
+<div class="page" id="page-network">
+  <div class="page-header">
+    <div><div class="page-title">Network</div><div class="page-subtitle">Relationships you build before you need them are the ones that actually work.</div></div>
+    <button class="btn btn-primary" onclick="openModal('modal-net')">+ Add Connection</button>
+  </div>
+
+  <div class="stats-grid" style="margin-bottom:20px;">
+    <div class="stat-card c1"><div class="stat-val" id="net-total">0</div><div class="stat-label">Total Connections</div></div>
+    <div class="stat-card c2"><div class="stat-val" id="net-ment">0</div><div class="stat-label">Mentors / Sponsors</div></div>
+    <div class="stat-card c3"><div class="stat-val" id="net-exod">0</div><div class="stat-label">EX / OD Peers</div></div>
+    <div class="stat-card c4"><div class="stat-val" id="net-nurture">0</div><div class="stat-label">Need Nurturing</div></div>
+  </div>
+
+  <div class="net-section">
+    <div class="net-section-title">Mentors & Sponsors</div>
+    <div class="net-grid" id="net-mentors"></div>
+  </div>
+  <div class="net-section">
+    <div class="net-section-title">ERG & Internal Allies</div>
+    <div class="net-grid" id="net-erg"></div>
+  </div>
+  <div class="net-section">
+    <div class="net-section-title">EX / OD / Consulting Connections</div>
+    <div class="net-grid" id="net-exod-list"></div>
+  </div>
+
+  <div class="tip-card">
+    <div class="tip-title">💬 Relationship Strategy Reminder</div>
+    One new relationship per quarter beyond your mentor. Use your ERG role as the natural reason to reach out. Your goal: when you announce you're available to consult, someone should already know what you do and want it.
+  </div>
+</div>
+
+<!-- PAGE: CONSULTING IP -->
+<div class="page" id="page-consulting">
+  <div class="page-header">
+    <div><div class="page-title">Consulting IP Vault</div><div class="page-subtitle">Every framework, tool, and insight — owned and documented.</div></div>
+    <button class="btn btn-primary" onclick="openModal('modal-ip')">+ Add IP Entry</button>
+  </div>
+
+  <div class="niche-card">
+    <div class="niche-label">Your Niche Statement</div>
+    <div class="niche-text">"I help organizations understand how their employees truly feel at work — and design culture and belonging interventions that make work feel less heavy and more intentional."</div>
+  </div>
+
+  <div class="ip-section">
+    <div class="ip-section-title">Frameworks & Tools</div>
+    <div id="ip-frameworks"></div>
+  </div>
+  <div class="ip-section">
+    <div class="ip-section-title">Survey & Diagnostic Instruments</div>
+    <div id="ip-surveys"></div>
+  </div>
+  <div class="ip-section">
+    <div class="ip-section-title">Workshop & Program Designs</div>
+    <div id="ip-workshops"></div>
+  </div>
+  <div class="ip-section">
+    <div class="ip-section-title">Methodology Notes</div>
+    <div id="ip-methodology"></div>
+  </div>
+
+  <div class="tip-card">
+    <div class="tip-title">📁 What to Save Here</div>
+    ERG program agendas · OD frameworks applied · Culture diagnostics designed · Course notes that shape your thinking · Monthly consulting brief entries (pick a people/culture problem → presenting problem → root cause → recommendation → what success looks like)
+  </div>
+</div>
+
+</main>
+
+<!-- ========== MODALS ========== -->
+
+<!-- ACCOMPLISHMENTS MODAL -->
+<div class="modal-overlay" id="modal-acc">
+  <div class="modal">
+    <div class="modal-title">Add Accomplishment <button class="modal-close" onclick="closeModal('modal-acc')">✕</button></div>
+    <div class="form-group"><label class="form-label">Title *</label><input class="form-input" id="acc-title" placeholder="What did you accomplish?"></div>
+    <div class="form-group"><label class="form-label">Category</label>
+      <select class="form-select" id="acc-cat">
+        <option>EA Excellence</option><option>EX Initiative</option><option>Culture & Engagement</option><option>ERG Work</option><option>Event Management</option><option>Process Improvement</option><option>OD & Consulting</option>
+      </select></div>
+    <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="acc-date"></div>
+    <div class="form-group"><label class="form-label">Impact / Result</label><textarea class="form-textarea" id="acc-impact" placeholder="What changed because of this?"></textarea></div>
+    <div class="form-group"><label class="form-label">Stakeholders Involved</label><input class="form-input" id="acc-stake" placeholder="Names or roles"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveAcc()">Save Accomplishment</button>
+  </div>
+</div>
+
+<!-- PROJECTS MODAL -->
+<div class="modal-overlay" id="modal-proj">
+  <div class="modal">
+    <div class="modal-title">Add Project <button class="modal-close" onclick="closeModal('modal-proj')">✕</button></div>
+    <div class="form-group"><label class="form-label">Project Name *</label><input class="form-input" id="proj-name" placeholder="What are you building?"></div>
+    <div class="form-group"><label class="form-label">Status</label>
+      <select class="form-select" id="proj-status"><option>In Progress</option><option>Planned</option><option>Completed</option></select></div>
+    <div class="form-group"><label class="form-label">Priority</label>
+      <select class="form-select" id="proj-priority"><option>High</option><option>Medium</option><option>Low</option></select></div>
+    <div class="form-group"><label class="form-label">Deadline</label><input type="date" class="form-input" id="proj-deadline"></div>
+    <div class="form-group"><label class="form-label">Category</label>
+      <select class="form-select" id="proj-cat"><option>EA Work</option><option>EX Initiative</option><option>ERG Program</option><option>OD Work</option><option>Learning</option></select></div>
+    <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="proj-desc" placeholder="What's the scope?"></textarea></div>
+    <div class="form-group"><label class="form-label">Progress % (0–100)</label><input type="number" class="form-input" id="proj-prog" min="0" max="100" value="0"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveProj()">Save Project</button>
+  </div>
+</div>
+
+<!-- STAKEHOLDERS MODAL -->
+<div class="modal-overlay" id="modal-stake">
+  <div class="modal">
+    <div class="modal-title">Add Stakeholder <button class="modal-close" onclick="closeModal('modal-stake')">✕</button></div>
+    <div class="form-group"><label class="form-label">Name *</label><input class="form-input" id="stake-name" placeholder="Full name"></div>
+    <div class="form-group"><label class="form-label">Title / Role</label><input class="form-input" id="stake-title" placeholder="Their role"></div>
+    <div class="form-group"><label class="form-label">Department</label><input class="form-input" id="stake-dept" placeholder="Team or department"></div>
+    <div class="form-group"><label class="form-label">Relationship Tier</label>
+      <select class="form-select" id="stake-tier"><option>Executive Sponsor</option><option>Key Ally</option><option>Champion</option><option>Collaborator</option><option>To Nurture</option></select></div>
+    <div class="form-group"><label class="form-label">Last Interaction</label><input type="date" class="form-input" id="stake-last"></div>
+    <div class="form-group"><label class="form-label">Notes / Next Step</label><textarea class="form-textarea" id="stake-notes" placeholder="What's next with this person?"></textarea></div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveStake()">Save Stakeholder</button>
+  </div>
+</div>
+
+<!-- MEETINGS MODAL -->
+<div class="modal-overlay" id="modal-meet">
+  <div class="modal">
+    <div class="modal-title">Add Meeting / Event <button class="modal-close" onclick="closeModal('modal-meet')">✕</button></div>
+    <div class="form-group"><label class="form-label">Title *</label><input class="form-input" id="meet-title" placeholder="Event or meeting name"></div>
+    <div class="form-group"><label class="form-label">Date *</label><input type="date" class="form-input" id="meet-date"></div>
+    <div class="form-group"><label class="form-label">Type</label>
+      <select class="form-select" id="meet-type"><option>Internal Meeting</option><option>ERG Event</option><option>Company Event</option><option>Leadership Briefing</option><option>All-Hands</option><option>Workshop</option><option>1:1</option></select></div>
+    <div class="form-group"><label class="form-label">Attendees</label><input class="form-input" id="meet-att" placeholder="Who was there?"></div>
+    <div class="form-group"><label class="form-label">My Role</label>
+      <select class="form-select" id="meet-role"><option>Organizer/Owner</option><option>Presenter</option><option>Facilitator</option><option>Coordinator</option><option>Attendee</option></select></div>
+    <div class="form-group"><label class="form-label">Notes / Outcome</label><textarea class="form-textarea" id="meet-notes" placeholder="What happened? What came of it?"></textarea></div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveMeet()">Save Event</button>
+  </div>
+</div>
+
+<!-- VISIBILITY MODAL -->
+<div class="modal-overlay" id="modal-vis">
+  <div class="modal">
+    <div class="modal-title">Log Visibility Moment <button class="modal-close" onclick="closeModal('modal-vis')">✕</button></div>
+    <div class="form-group"><label class="form-label">Title / Event *</label><input class="form-input" id="vis-title" placeholder="What was the moment?"></div>
+    <div class="form-group"><label class="form-label">Type</label>
+      <select class="form-select" id="vis-type"><option>Presentation</option><option>ERG Leadership</option><option>Leadership Exposure</option><option>Cross-Functional Project</option><option>Internal Post</option><option>Panel or Discussion</option><option>External Speaking</option></select></div>
+    <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="vis-date"></div>
+    <div class="form-group"><label class="form-label">Audience</label><input class="form-input" id="vis-aud" placeholder="Who was in the room?"></div>
+    <div class="form-group"><label class="form-label">Outcome</label><textarea class="form-textarea" id="vis-out" placeholder="What came from being visible here?"></textarea></div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveVis()">Log Moment</button>
+  </div>
+</div>
+
+<!-- RECOGNITION MODAL -->
+<div class="modal-overlay" id="modal-rec">
+  <div class="modal">
+    <div class="modal-title">🌟 Log Recognition <button class="modal-close" onclick="closeModal('modal-rec')">✕</button></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label class="form-label">Who recognized you *</label><input class="form-input" type="text" id="re-who" placeholder="Full name"></div>
+      <div class="form-group"><label class="form-label">Their Title / Role</label><input class="form-input" type="text" id="re-role" placeholder="e.g. VP of People, CHRO"></div>
+    </div>
+
+    <div class="form-group"><label class="form-label">What they said or did</label>
+      <textarea class="form-textarea" id="re-msg" placeholder="Describe the recognition — quote if possible. What exactly did they say or do?"></textarea>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label class="form-label">How / Where it happened</label>
+        <select class="form-select" id="re-how">
+          <option>Meeting (Teams or In-Person)</option>
+          <option>TrueBlue</option>
+          <option>LinkedIn</option>
+          <option>Word of Mouth</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="re-d"></div>
+    </div>
+
+    <div class="form-group"><label class="form-label">Audience — who else was present or saw it?</label>
+      <input class="form-input" type="text" id="re-aud" placeholder="e.g. 1:1 only, full leadership team, all-hands of 200">
+    </div>
+
+    <div class="form-group"><label class="form-label">Company Tenet <span style="font-size:10px;color:var(--muted)">(if TrueBlue or tenet-aligned)</span></label>
+      <select class="form-select" id="re-tenet">
+        <option value="">— Not applicable —</option>
+        <option>Put People First</option>
+        <option>Celebrate Individuality. Act Together.</option>
+        <option>Tell the Truth. Tell it Fast.</option>
+        <option>Be Part of the Solution</option>
+        <option>Think Big. Be Humble.</option>
+      </select>
+    </div>
+
+    <div class="form-group"><label class="form-label">My Personal Tenet it Reflects</label>
+      <select class="form-select" id="re-ptenet">
+        <option>Make People Feel Seen</option>
+        <option>Bring Clarity to Chaos</option>
+        <option>Translate Feeling into Action</option>
+        <option>Anticipate Before It's Asked</option>
+        <option>Build with Intention</option>
+        <option>Show Up for People</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Areas Strengthened <span style="font-size:10px;color:var(--muted)">(select all that apply)</span></label>
+      <div class="ms-wrap" id="re-areas-wrap">
+        <div class="ms-opt" data-val="Employee Experience" onclick="this.classList.toggle('sel')">Employee Experience</div>
+        <div class="ms-opt" data-val="Culture & Belonging" onclick="this.classList.toggle('sel')">Culture & Belonging</div>
+        <div class="ms-opt" data-val="Organizational Development" onclick="this.classList.toggle('sel')">Organizational Development</div>
+        <div class="ms-opt" data-val="Program Design & Execution" onclick="this.classList.toggle('sel')">Program Design & Execution</div>
+        <div class="ms-opt" data-val="Leadership & Executive Support" onclick="this.classList.toggle('sel')">Leadership & Executive Support</div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:2">
+        <div><strong style="color:var(--text)">Employee Experience</strong> — proves you create or improve how people experience work</div>
+        <div><strong style="color:var(--text)">Culture & Belonging</strong> — proves you build environments where people feel included and safe</div>
+        <div><strong style="color:var(--text)">Organizational Development</strong> — proves you think systemically about how organizations function</div>
+        <div><strong style="color:var(--text)">Program Design & Execution</strong> — proves you take an idea from concept to delivered reality</div>
+        <div><strong style="color:var(--text)">Leadership & Executive Support</strong> — proves your EA-level skills: discretion, anticipation, high-stakes support</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px;">
+      <button class="btn btn-ghost" onclick="closeModal('modal-rec')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRec()">Save Recognition</button>
+    </div>
+  </div>
+</div>
+
+<!-- CERT MODAL -->
+<div class="modal-overlay" id="modal-cert">
+  <div class="modal">
+    <div class="modal-title">Add Certification <button class="modal-close" onclick="closeModal('modal-cert')">✕</button></div>
+    <div class="form-group"><label class="form-label">Name *</label><input class="form-input" id="cert-name" placeholder="Certification name"></div>
+    <div class="form-group"><label class="form-label">Provider</label><input class="form-input" id="cert-provider" placeholder="Who offers this?"></div>
+    <div class="form-group"><label class="form-label">Status</label>
+      <select class="form-select" id="cert-status"><option>Planned</option><option>In Progress</option><option>Completed</option></select></div>
+    <div class="form-group"><label class="form-label">Target Date</label><input type="date" class="form-input" id="cert-date"></div>
+    <div class="form-group"><label class="form-label">Progress %</label><input type="number" class="form-input" id="cert-prog" min="0" max="100" value="0"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveCert()">Save Certification</button>
+  </div>
+</div>
+
+<!-- ERG MODAL -->
+<div class="modal-overlay" id="modal-erg">
+  <div class="modal">
+    <div class="modal-title">Add ERG Program <button class="modal-close" onclick="closeModal('modal-erg')">✕</button></div>
+    <div class="form-group"><label class="form-label">Program Name *</label><input class="form-input" id="erg-name" placeholder="Name this program"></div>
+    <div class="form-group"><label class="form-label">Lens</label>
+      <select class="form-select" id="erg-lens"><option>Visibility</option><option>Development</option><option>Trust & Belonging</option></select></div>
+    <div class="form-group"><label class="form-label">Status</label>
+      <select class="form-select" id="erg-status"><option>Idea</option><option>Planning</option><option>In Progress</option><option>Completed</option></select></div>
+    <div class="form-group"><label class="form-label">Intended Outcome — write BEFORE logistics</label><textarea class="form-textarea" id="erg-outcome" placeholder="Attendees will feel... / Members will be able to..."></textarea></div>
+    <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="erg-date"></div>
+    <div class="form-group"><label class="form-label">Budget ($)</label><input type="number" class="form-input" id="erg-budget" placeholder="0"></div>
+    <div class="form-group"><label class="form-label">Attendance / Reach</label><input class="form-input" id="erg-reach" placeholder="How many people?"></div>
+    <div class="form-group"><label class="form-label">Impact / Feedback After Event</label><textarea class="form-textarea" id="erg-feedback" placeholder="What actually happened? What changed?"></textarea></div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveErg()">Save Program</button>
+  </div>
+</div>
+
+<!-- IMPACT LOG EDIT MODAL (for editing saved entries) -->
+<div class="modal-overlay" id="modal-impact-edit">
+  <div class="modal">
+    <div class="modal-title">Edit Impact Entry <button class="modal-close" onclick="closeModal('modal-impact-edit')">✕</button></div>
+    <div class="form-group"><label class="form-label">Outcome (reframed)</label><textarea class="form-textarea" id="imp-edit-reframe" rows="3"></textarea></div>
+    <div class="form-group"><label class="form-label">Category</label>
+      <select class="form-select" id="imp-edit-cat">
+        <option>ERG</option><option>Culture Work</option><option>People Made to Feel Seen</option><option>Process Improved</option><option>Leadership Visibility</option><option>Career Development</option><option>Degree & Learning Applied</option><option>Relationship Built</option>
+      </select></div>
+    <div class="form-group"><label class="form-label">Performance Review Framing</label><textarea class="form-textarea" id="imp-edit-review" rows="3"></textarea></div>
+    <input type="hidden" id="imp-edit-id">
+    <button class="btn btn-primary" style="width:100%" onclick="saveImpactEdit()">Save Changes</button>
+  </div>
+</div>
+
+<!-- NETWORK MODAL -->
+<div class="modal-overlay" id="modal-net">
+  <div class="modal">
+    <div class="modal-title">Add Connection <button class="modal-close" onclick="closeModal('modal-net')">✕</button></div>
+    <div class="form-group"><label class="form-label">Name *</label><input class="form-input" id="net-name" placeholder="Full name"></div>
+    <div class="form-group"><label class="form-label">Title / Role</label><input class="form-input" id="net-title" placeholder="Their role or company"></div>
+    <div class="form-group"><label class="form-label">Type</label>
+      <select class="form-select" id="net-type"><option>Mentor</option><option>Sponsor</option><option>ERG & Internal Ally</option><option>EX & OD Peer</option><option>LinkedIn Target</option><option>Consulting Connection</option><option>To Nurture</option></select></div>
+    <div class="form-group"><label class="form-label">Warmth</label>
+      <select class="form-select" id="net-warmth"><option>🔥 Strong</option><option>🌱 Growing</option><option>❄️ Cold</option><option>🆕 Just connected</option></select></div>
+    <div class="form-group"><label class="form-label">Last Contact</label><input type="date" class="form-input" id="net-last"></div>
+    <div class="form-group"><label class="form-label">Notes / Next Action</label><textarea class="form-textarea" id="net-notes" placeholder="What's the plan with this person?"></textarea></div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveNet()">Save Connection</button>
+  </div>
+</div>
+
+<!-- CONSULTING IP MODAL -->
+<div class="modal-overlay" id="modal-ip">
+  <div class="modal">
+    <div class="modal-title">Add IP Entry <button class="modal-close" onclick="closeModal('modal-ip')">✕</button></div>
+    <div class="form-group"><label class="form-label">Title *</label><input class="form-input" id="ip-title" placeholder="Name this asset"></div>
+    <div class="form-group"><label class="form-label">Type</label>
+      <select class="form-select" id="ip-type"><option>Framework</option><option>Survey & Diagnostic Tool</option><option>Workshop Design</option><option>Methodology Note</option><option>Consulting Brief</option><option>Program Blueprint</option></select></div>
+    <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="ip-date"></div>
+    <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="ip-desc" placeholder="What is this and how do you use it?"></textarea></div>
+    <div class="form-group"><label class="form-label">Source</label><input class="form-input" id="ip-source" placeholder="ERG, course, work project, observation..."></div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveIp()">Save to Vault</button>
+  </div>
+</div>
+
+<!-- PHASE TASK EDIT MODAL -->
+<div class="modal-overlay" id="modal-addtask">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-title">Add Goal <button class="modal-close" onclick="closeModal('modal-addtask')">✕</button></div>
+    <div class="form-group"><label class="form-label">Goal / Task</label><textarea class="form-textarea" id="addtask-text" rows="3" placeholder="What will you do?"></textarea></div>
+    <input type="hidden" id="addtask-phase">
+    <button class="btn btn-primary" style="width:100%" onclick="saveCustomTask()">Add Goal</button>
+  </div>
+</div>
+
+<!-- SKILL MODAL -->
+<div class="modal-overlay" id="modal-skill">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-title">Add / Edit Skill <button class="modal-close" onclick="closeModal('modal-skill')">✕</button></div>
+    <div class="form-group"><label class="form-label">Skill Name *</label><input class="form-input" id="sk-label" placeholder="e.g. Facilitation, Change Management"></div>
+    <div class="form-group"><label class="form-label">Proficiency % (0–100)</label><input type="number" class="form-input" id="sk-pct" min="0" max="100" value="50"></div>
+    <input type="hidden" id="sk-edit-id">
+    <button class="btn btn-primary" style="width:100%" onclick="saveSkill()">Save Skill</button>
+  </div>
+</div>
+
+<script>
+// ============ DATA STORE ============
+let db = {};
+
+const KEYS = {
+  acc: 'cgd_accomplishments',
+  proj: 'cgd_projects',
+  stake: 'cgd_stakeholders',
+  meet: 'cgd_meetings',
+  vis: 'cgd_visibility',
+  certs: 'cgd_certs',
+  erg: 'cgd_erg',
+  impact: 'cgd_impact',
+  network: 'cgd_network',
+  ip: 'cgd_ip',
+  phases: 'cgd_phases',
+  skills: 'cgd_skills',
+  recs: 'cgd_recs'
+};
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ============ STORAGE ============
+async function storeSet(key, val) {
+  const s = JSON.stringify(val);
+  localStorage.setItem(key, s);
+  try {
+    if (window.storage) await window.storage.set(key, s);
+  } catch(e) {}
+}
+
+async function storeGet(key) {
+  try {
+    if (window.storage) {
+      const r = await window.storage.get(key);
+      if (r && r.value) return JSON.parse(r.value);
+    }
+  } catch(e) {}
+  const ls = localStorage.getItem(key);
+  return ls ? JSON.parse(ls) : null;
+}
+
+async function loadAll() {
+  for (const [k, key] of Object.entries(KEYS)) {
+    db[k] = await storeGet(key) || getDefault(k);
+  }
+}
+
+function getDefault(k) {
+  if (k === 'phases') return getDefaultPhases();
+  if (k === 'skills') return getDefaultSkills();
+  return [];
+}
+
+function showSaved() {
+  const el = document.getElementById('save-indicator');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+async function save(k) {
+  await storeSet(KEYS[k], db[k]);
+  showSaved();
+}
+
+// ============ MODAL HELPERS ============
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ============ NAV ============
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + el.dataset.page).classList.add('active');
+    document.getElementById('main').scrollTop = 0;
+    if (el.dataset.page === 'dashboard') renderDashboard();
+  });
+});
+
+// ============ TAGS ============
+function priorityTag(p) {
+  const colors = { High: 'accent4', Medium: 'accent3', Low: 'accent2' };
+  return `<span class="tag tag-${colors[p]||'muted'}">${p}</span>`;
+}
+function statusTag(s) {
+  if (s === 'Completed') return `<span class="tag tag-accent2">${s}</span>`;
+  if (s === 'In Progress') return `<span class="tag tag-accent3">${s}</span>`;
+  if (s === 'Planning') return `<span class="tag tag-accent">${s}</span>`;
+  return `<span class="tag tag-muted">${s}</span>`;
+}
+function tierTag(t) {
+  const m = { 'Executive Sponsor': 'accent', 'Key Ally': 'accent2', 'Champion': 'accent3', 'Collaborator': 'accent4', 'To Nurture': 'muted' };
+  return `<span class="tag tag-${m[t]||'muted'}">${t}</span>`;
+}
+function warmthBadge(w) {
+  return `<span style="font-size:0.85rem">${w.split(' ')[0]}</span>`;
+}
+
+function avatar(name) {
+  const parts = (name||'?').trim().split(' ');
+  const initials = (parts[0][0]||'') + (parts[1]?.[0]||'');
+  const colors = ['#7c6af7','#5ec4a8','#f2a65a','#e06b8b','#6b9cf7'];
+  const c = colors[name.charCodeAt(0) % colors.length];
+  return `<div class="avatar" style="background:${c}">${initials.toUpperCase()}</div>`;
+}
+
+function dateBox(dateStr) {
+  if (!dateStr) return `<div class="date-box" style="background:var(--muted)"><span class="d-num">—</span><span>TBD</span></div>`;
+  const d = new Date(dateStr + 'T00:00:00');
+  const mon = d.toLocaleString('en',{month:'short'});
+  const day = d.getDate();
+  return `<div class="date-box"><span class="d-num">${day}</span><span>${mon}</span></div>`;
+}
+
+function fmtDate(ds) {
+  if (!ds) return '—';
+  const d = new Date(ds + 'T00:00:00');
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+
+function actBtns(del, edit) {
+  return `<div class="entry-actions">
+    <button class="act-btn" title="Edit" onclick="${edit}">✎</button>
+    <button class="act-btn del" title="Delete" onclick="${del}">✕</button>
+  </div>`;
+}
+function smallActBtns(del, edit) {
+  return `<div style="display:flex;gap:3px;opacity:0;transition:opacity 0.15s" class="act-btns-sm">
+    <button class="act-btn" onclick="${edit}">✎</button>
+    <button class="act-btn del" onclick="${del}">✕</button>
+  </div>`;
+}
+
+// ============ ACCOMPLISHMENTS ============
+function saveAcc() {
+  const title = document.getElementById('acc-title').value.trim();
+  if (!title) return;
+  db.acc.unshift({
+    id: uid(), title,
+    cat: document.getElementById('acc-cat').value,
+    date: document.getElementById('acc-date').value,
+    impact: document.getElementById('acc-impact').value,
+    stake: document.getElementById('acc-stake').value
+  });
+  save('acc'); closeModal('modal-acc');
+  document.getElementById('acc-title').value = '';
+  document.getElementById('acc-impact').value = '';
+  document.getElementById('acc-stake').value = '';
+  renderAcc();
+}
+
+function renderAcc() {
+  const el = document.getElementById('acc-list');
+  if (!db.acc.length) { el.innerHTML = '<div style="color:var(--muted);font-size:0.82rem;padding:12px 0">No accomplishments yet — add your first one.</div>'; return; }
+  el.innerHTML = db.acc.map(a => `
+    <div class="entry-item">
+      <div class="entry-body">
+        <div class="entry-title">${escHtml(a.title)}</div>
+        <div class="entry-meta">
+          <span class="tag tag-accent">${a.cat||'—'}</span>
+          <span>${fmtDate(a.date)}</span>
+          ${a.stake?`<span>with ${escHtml(a.stake)}</span>`:''}
+        </div>
+        ${a.impact?`<div style="font-size:0.78rem;color:var(--muted);margin-top:5px;line-height:1.5">${escHtml(a.impact)}</div>`:''}
+      </div>
+      <div class="entry-actions">
+        <button class="act-btn" onclick="editAcc('${a.id}')">✎</button>
+        <button class="act-btn del" onclick="delAcc('${a.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function delAcc(id) { if (!confirm('Delete?')) return; db.acc = db.acc.filter(x=>x.id!==id); save('acc'); renderAcc(); }
+function editAcc(id) {
+  const a = db.acc.find(x=>x.id===id); if(!a) return;
+  document.getElementById('acc-title').value = a.title;
+  document.getElementById('acc-cat').value = a.cat||'EA Excellence';
+  document.getElementById('acc-date').value = a.date||'';
+  document.getElementById('acc-impact').value = a.impact||'';
+  document.getElementById('acc-stake').value = a.stake||'';
+  db.acc = db.acc.filter(x=>x.id!==id);
+  openModal('modal-acc');
+}
+
+// ============ PROJECTS ============
+function saveProj() {
+  const name = document.getElementById('proj-name').value.trim(); if (!name) return;
+  db.proj.unshift({
+    id: uid(), name,
+    status: document.getElementById('proj-status').value,
+    priority: document.getElementById('proj-priority').value,
+    deadline: document.getElementById('proj-deadline').value,
+    cat: document.getElementById('proj-cat').value,
+    desc: document.getElementById('proj-desc').value,
+    prog: parseInt(document.getElementById('proj-prog').value)||0
+  });
+  save('proj'); closeModal('modal-proj');
+  document.getElementById('proj-name').value = '';
+  document.getElementById('proj-desc').value = '';
+  document.getElementById('proj-prog').value = '0';
+  renderProj();
+}
+
+function renderProj() {
+  const groups = { 'In Progress': [], 'Planned': [], 'Completed': [] };
+  db.proj.forEach(p => (groups[p.status]||groups['Planned']).push(p));
+  const cols = [['proj-inprogress','In Progress','proj-ip-count'],['proj-planned','Planned','proj-pl-count'],['proj-completed','Completed','proj-co-count']];
+  cols.forEach(([colId, status, countId]) => {
+    const items = groups[status];
+    document.getElementById(countId).textContent = items.length;
+    document.getElementById(colId).innerHTML = items.map(p => {
+      const pct = Math.min(100, Math.max(0, p.prog||0));
+      const col = pct===100?'var(--accent2)':pct>50?'var(--accent3)':'var(--accent)';
+      return `<div class="kanban-card">
+        <div class="kc-title">${escHtml(p.name)}</div>
+        <div class="kc-meta">${priorityTag(p.priority)}<span class="tag tag-muted">${p.cat||''}</span>${p.deadline?`<span style="font-size:0.7rem;color:var(--muted)">${fmtDate(p.deadline)}</span>`:''}</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px">${pct}% complete</div>
+        <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%;background:${col}"></div></div>
+        <div class="kc-actions">
+          <button class="act-btn" onclick="editProj('${p.id}')">✎</button>
+          <button class="act-btn del" onclick="delProj('${p.id}')">✕</button>
+        </div>
+      </div>`;}).join('');
+  });
+}
+
+function delProj(id) { if(!confirm('Delete?'))return; db.proj=db.proj.filter(x=>x.id!==id); save('proj'); renderProj(); }
+function editProj(id) {
+  const p = db.proj.find(x=>x.id===id); if(!p) return;
+  document.getElementById('proj-name').value = p.name;
+  document.getElementById('proj-status').value = p.status;
+  document.getElementById('proj-priority').value = p.priority;
+  document.getElementById('proj-deadline').value = p.deadline||'';
+  document.getElementById('proj-cat').value = p.cat||'EA Work';
+  document.getElementById('proj-desc').value = p.desc||'';
+  document.getElementById('proj-prog').value = p.prog||0;
+  db.proj = db.proj.filter(x=>x.id!==id);
+  openModal('modal-proj');
+}
+
+// ============ STAKEHOLDERS ============
+function saveStake() {
+  const name = document.getElementById('stake-name').value.trim(); if(!name) return;
+  db.stake.unshift({ id:uid(), name, title:document.getElementById('stake-title').value, dept:document.getElementById('stake-dept').value, tier:document.getElementById('stake-tier').value, last:document.getElementById('stake-last').value, notes:document.getElementById('stake-notes').value });
+  save('stake'); closeModal('modal-stake');
+  document.getElementById('stake-name').value=''; document.getElementById('stake-title').value=''; document.getElementById('stake-dept').value=''; document.getElementById('stake-notes').value='';
+  renderStake();
+}
+
+function renderStake() {
+  const el = document.getElementById('stake-list');
+  if(!db.stake.length){el.innerHTML='<div style="color:var(--muted);font-size:0.82rem;padding:12px 0">No stakeholders yet.</div>';return;}
+  el.innerHTML = db.stake.map(s=>`
+    <div class="entry-item">
+      ${avatar(s.name)}
+      <div class="entry-body">
+        <div class="entry-title">${escHtml(s.name)}</div>
+        <div class="entry-meta">${s.title?`<span>${escHtml(s.title)}</span>`:''} ${s.dept?`<span>· ${escHtml(s.dept)}</span>`:''} ${tierTag(s.tier)} ${s.last?`<span>Last: ${fmtDate(s.last)}</span>`:''}</div>
+        ${s.notes?`<div style="font-size:0.78rem;color:var(--muted);margin-top:4px">${escHtml(s.notes)}</div>`:''}
+      </div>
+      <div class="entry-actions">
+        <button class="act-btn" onclick="editStake('${s.id}')">✎</button>
+        <button class="act-btn del" onclick="delStake('${s.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function delStake(id){if(!confirm('Delete?'))return;db.stake=db.stake.filter(x=>x.id!==id);save('stake');renderStake();}
+function editStake(id){
+  const s=db.stake.find(x=>x.id===id);if(!s)return;
+  document.getElementById('stake-name').value=s.name;
+  document.getElementById('stake-title').value=s.title||'';
+  document.getElementById('stake-dept').value=s.dept||'';
+  document.getElementById('stake-tier').value=s.tier||'Collaborator';
+  document.getElementById('stake-last').value=s.last||'';
+  document.getElementById('stake-notes').value=s.notes||'';
+  db.stake=db.stake.filter(x=>x.id!==id);
+  openModal('modal-stake');
+}
+
+// ============ MEETINGS ============
+function saveMeet() {
+  const title=document.getElementById('meet-title').value.trim(); if(!title)return;
+  db.meet.push({ id:uid(), title, date:document.getElementById('meet-date').value, type:document.getElementById('meet-type').value, att:document.getElementById('meet-att').value, role:document.getElementById('meet-role').value, notes:document.getElementById('meet-notes').value });
+  save('meet'); closeModal('modal-meet');
+  document.getElementById('meet-title').value=''; document.getElementById('meet-date').value=''; document.getElementById('meet-att').value=''; document.getElementById('meet-notes').value='';
+  renderMeet();
+}
+
+function renderMeet() {
+  const today = new Date().toISOString().slice(0,10);
+  const upcoming = db.meet.filter(m=>m.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
+  const past = db.meet.filter(m=>m.date<today).sort((a,b)=>b.date.localeCompare(a.date));
+  const render = (arr, el) => {
+    document.getElementById(el).innerHTML = arr.length ? arr.map(m=>`
+      <div class="entry-item">
+        ${dateBox(m.date)}
+        <div class="entry-body">
+          <div class="entry-title">${escHtml(m.title)}</div>
+          <div class="entry-meta"><span class="tag tag-accent">${m.type}</span><span class="tag tag-muted">${m.role}</span>${m.att?`<span>${escHtml(m.att)}</span>`:''}</div>
+          ${m.notes?`<div style="font-size:0.78rem;color:var(--muted);margin-top:4px">${escHtml(m.notes)}</div>`:''}
+        </div>
+        <div class="entry-actions">
+          <button class="act-btn" onclick="editMeet('${m.id}')">✎</button>
+          <button class="act-btn del" onclick="delMeet('${m.id}')">✕</button>
+        </div>
+      </div>`).join('') : '<div style="color:var(--muted);font-size:0.82rem">None yet.</div>';
+  };
+  render(upcoming, 'meet-upcoming'); render(past, 'meet-past');
+}
+
+function delMeet(id){if(!confirm('Delete?'))return;db.meet=db.meet.filter(x=>x.id!==id);save('meet');renderMeet();}
+function editMeet(id){
+  const m=db.meet.find(x=>x.id===id);if(!m)return;
+  document.getElementById('meet-title').value=m.title;
+  document.getElementById('meet-date').value=m.date||'';
+  document.getElementById('meet-type').value=m.type||'Internal Meeting';
+  document.getElementById('meet-att').value=m.att||'';
+  document.getElementById('meet-role').value=m.role||'Attendee';
+  document.getElementById('meet-notes').value=m.notes||'';
+  db.meet=db.meet.filter(x=>x.id!==id);
+  openModal('modal-meet');
+}
+
+// ============ VISIBILITY ============
+const VIS_TYPES = ['Presentation','ERG Leadership','Leadership Exposure','Cross-Functional Project','Internal Post','Panel or Discussion','External Speaking'];
+const VIS_ICONS = { 'Presentation':'◎','ERG Leadership':'⬡','Leadership Exposure':'◬','Cross-Functional Project':'◈','Internal Post':'✎','Panel or Discussion':'◷','External Speaking':'★' };
+
+function saveVis() {
+  const title=document.getElementById('vis-title').value.trim(); if(!title)return;
+  db.vis.unshift({ id:uid(), title, type:document.getElementById('vis-type').value, date:document.getElementById('vis-date').value, aud:document.getElementById('vis-aud').value, out:document.getElementById('vis-out').value });
+  save('vis'); closeModal('modal-vis');
+  document.getElementById('vis-title').value=''; document.getElementById('vis-aud').value=''; document.getElementById('vis-out').value='';
+  renderVis();
+}
+
+function renderVis() {
+  document.getElementById('vis-total-badge').textContent = db.vis.length;
+  const el = document.getElementById('vis-list');
+  el.innerHTML = db.vis.length ? db.vis.map(v=>`
+    <div class="entry-item">
+      <div style="width:28px;text-align:center;font-size:1.1rem;padding-top:2px">${VIS_ICONS[v.type]||'◎'}</div>
+      <div class="entry-body">
+        <div class="entry-title">${escHtml(v.title)}</div>
+        <div class="entry-meta"><span class="tag tag-accent">${v.type}</span>${v.date?`<span>${fmtDate(v.date)}</span>`:''} ${v.aud?`<span>${escHtml(v.aud)}</span>`:''}</div>
+        ${v.out?`<div style="font-size:0.78rem;color:var(--muted);margin-top:3px">${escHtml(v.out)}</div>`:''}
+      </div>
+      <div class="entry-actions">
+        <button class="act-btn" onclick="editVis('${v.id}')">✎</button>
+        <button class="act-btn del" onclick="delVis('${v.id}')">✕</button>
+      </div>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:0.82rem">No visibility moments yet. Log your first one.</div>';
+
+  // Chart
+  const counts = {};
+  VIS_TYPES.forEach(t=>counts[t]=0);
+  db.vis.forEach(v=>{ if(counts[v.type]!==undefined) counts[v.type]++; });
+  const max = Math.max(...Object.values(counts), 1);
+  document.getElementById('vis-chart').innerHTML = VIS_TYPES.map(t=>`
+    <div class="vis-bar-row">
+      <div class="vis-bar-label">${VIS_ICONS[t]||''} ${t}</div>
+      <div class="vis-bar-outer"><div class="vis-bar-inner" style="width:${(counts[t]/max)*100}%"></div></div>
+      <div class="vis-bar-count">${counts[t]}</div>
+    </div>`).join('');
+}
+
+function delVis(id){if(!confirm('Delete?'))return;db.vis=db.vis.filter(x=>x.id!==id);save('vis');renderVis();}
+function editVis(id){
+  const v=db.vis.find(x=>x.id===id);if(!v)return;
+  document.getElementById('vis-title').value=v.title;
+  document.getElementById('vis-type').value=v.type||'Presentation';
+  document.getElementById('vis-date').value=v.date||'';
+  document.getElementById('vis-aud').value=v.aud||'';
+  document.getElementById('vis-out').value=v.out||'';
+  db.vis=db.vis.filter(x=>x.id!==id);
+  openModal('modal-vis');
+}
+
+// ============ CERTIFICATIONS ============
+function saveCert() {
+  const name=document.getElementById('cert-name').value.trim(); if(!name)return;
+  db.certs.unshift({ id:uid(), name, provider:document.getElementById('cert-provider').value, status:document.getElementById('cert-status').value, date:document.getElementById('cert-date').value, prog:parseInt(document.getElementById('cert-prog').value)||0 });
+  save('certs'); closeModal('modal-cert');
+  document.getElementById('cert-name').value=''; document.getElementById('cert-provider').value=''; document.getElementById('cert-prog').value='0';
+  renderCerts();
+}
+
+function renderCerts() {
+  const el = document.getElementById('certs-list');
+  if(!db.certs.length){el.innerHTML='<div style="color:var(--muted);font-size:0.82rem">Add your first certification.</div>';return;}
+  el.innerHTML = db.certs.map(c=>`
+    <div class="cert-card">
+      <div class="cert-name">${escHtml(c.name)}</div>
+      <div class="cert-meta">${c.provider?`<span>${escHtml(c.provider)}</span>`:''}${statusTag(c.status)}${c.date?`<span>${fmtDate(c.date)}</span>`:''}</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="progress-wrap" style="flex:1"><div class="progress-fill" style="width:${c.prog||0}%;background:var(--accent)"></div></div>
+        <span style="font-size:0.7rem;color:var(--muted)">${c.prog||0}%</span>
+      </div>
+      <div class="cert-actions">
+        <button class="act-btn" onclick="editCert('${c.id}')">✎</button>
+        <button class="act-btn del" onclick="delCert('${c.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function delCert(id){if(!confirm('Delete?'))return;db.certs=db.certs.filter(x=>x.id!==id);save('certs');renderCerts();}
+function editCert(id){
+  const c=db.certs.find(x=>x.id===id);if(!c)return;
+  document.getElementById('cert-name').value=c.name;
+  document.getElementById('cert-provider').value=c.provider||'';
+  document.getElementById('cert-status').value=c.status||'Planned';
+  document.getElementById('cert-date').value=c.date||'';
+  document.getElementById('cert-prog').value=c.prog||0;
+  db.certs=db.certs.filter(x=>x.id!==id);
+  openModal('modal-cert');
+}
+
+// ============ SKILLS BARS ============
+function getDefaultSkills() {
+  return [
+    {id:'sk1',label:'Project Management',pct:65},
+    {id:'sk2',label:'Event & Program Planning',pct:80},
+    {id:'sk3',label:'Stakeholder Management',pct:75},
+    {id:'sk4',label:'HR Fundamentals',pct:75},
+    {id:'sk5',label:'OD Frameworks',pct:20},
+    {id:'sk6',label:'Facilitation',pct:60},
+    {id:'sk7',label:'Change Management',pct:20},
+    {id:'sk8',label:'Culture Diagnostics',pct:30}
+  ];
+}
+
+function getDefaultSkills() {
+  return [
+    {id:'sk1',label:'Project Management',pct:65},
+    {id:'sk2',label:'Event & Program Planning',pct:80},
+    {id:'sk3',label:'Stakeholder Management',pct:75},
+    {id:'sk4',label:'HR Fundamentals',pct:75},
+    {id:'sk5',label:'OD Frameworks',pct:20},
+    {id:'sk6',label:'Facilitation',pct:60},
+    {id:'sk7',label:'Change Management',pct:20},
+    {id:'sk8',label:'Culture Diagnostics',pct:30}
+  ];
+}
+
+function saveSkill() {
+  const label = document.getElementById('sk-label').value.trim(); if (!label) return;
+  const pct = Math.min(100, Math.max(0, parseInt(document.getElementById('sk-pct').value) || 0));
+  const editId = document.getElementById('sk-edit-id').value;
+  if (editId) {
+    const s = db.skills.find(x => x.id === editId);
+    if (s) { s.label = label; s.pct = pct; }
+  } else {
+    db.skills.push({ id: uid(), label, pct });
+  }
+  save('skills');
+  closeModal('modal-skill');
+  document.getElementById('sk-label').value = '';
+  document.getElementById('sk-pct').value = '50';
+  document.getElementById('sk-edit-id').value = '';
+  renderSkills();
+}
+
+function editSkill(id) {
+  const s = db.skills.find(x => x.id === id); if (!s) return;
+  document.getElementById('sk-label').value = s.label;
+  document.getElementById('sk-pct').value = s.pct;
+  document.getElementById('sk-edit-id').value = id;
+  openModal('modal-skill');
+}
+
+function delSkill(id) {
+  if (!confirm('Remove this skill?')) return;
+  db.skills = db.skills.filter(x => x.id !== id);
+  save('skills'); renderSkills();
+}
+
+function renderSkills() {
+  const colors = ['var(--accent)','var(--accent2)','var(--accent3)','var(--accent4)'];
+  const el = document.getElementById('skills-bars');
+  if (!db.skills.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:0.82rem">No skills yet — add your first.</div>';
+  } else {
+    el.innerHTML = db.skills.map((s,i) => `
+      <div class="skill-row" style="position:relative;padding-right:52px;">
+        <span class="skill-label" style="font-size:0.78rem">${escHtml(s.label)}</span>
+        <div class="progress-wrap" style="flex:1;height:8px"><div class="progress-fill" style="width:${s.pct}%;background:${colors[i%4]}"></div></div>
+        <span class="skill-pct">${s.pct}%</span>
+        <div style="position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;gap:2px;opacity:0;transition:opacity 0.15s" class="skill-act">
+          <button class="act-btn" onclick="editSkill('${s.id}')">✎</button>
+          <button class="act-btn del" onclick="delSkill('${s.id}')">✕</button>
+        </div>
+      </div>`).join('');
+    // Show action buttons on row hover
+    el.querySelectorAll('.skill-row').forEach(row => {
+      row.addEventListener('mouseenter', () => row.querySelector('.skill-act').style.opacity = '1');
+      row.addEventListener('mouseleave', () => row.querySelector('.skill-act').style.opacity = '0');
+    });
+  }
+
+  // Dashboard skills preview
+  const dEl = document.getElementById('dash-skills');
+  if (dEl) dEl.innerHTML = db.skills.slice(0,5).map(s => `
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:4px"><span>${escHtml(s.label)}</span><span style="color:var(--muted)">${s.pct}%</span></div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:${s.pct}%;background:var(--accent)"></div></div>
+    </div>`).join('');
+}
+
+// ============ CAREER LADDER ============
+function renderLadder() {
+  const steps = [
+    {icon:'👋',title:'Executive Assistant',time:'Now',active:true},
+    {icon:'✨',title:'EA + Culture & Engagement Lead',time:'Year 1',active:false},
+    {icon:'🌱',title:'Culture & Engagement Specialist',time:'Year 1–2',active:false},
+    {icon:'📊',title:'OD Coordinator / OE Analyst',time:'Year 2–3',active:false},
+    {icon:'🎓',title:'Sr. OD / Change Management Specialist',time:'Year 3–4 (post Jan 2029)',active:false},
+    {icon:'🏆',title:'Independent OD/EX Consultant',time:'Year 5+',dream:true}
+  ];
+  document.getElementById('career-ladder').innerHTML = steps.map(s=>`
+    <div class="ladder-step">
+      <div class="ls-node ${s.active?'active':''} ${s.dream?'dream':''}">${s.icon}</div>
+      <div class="ls-title">${s.title}${s.dream?`<br><span class="tag tag-accent3" style="margin-top:3px;display:inline-block">DREAM ROLE</span>`:''}</div>
+      <div class="ls-time">${s.time}</div>
+    </div>`).join('');
+}
+
+// ============ JOURNEY BAR ============
+function renderJourney() {
+  const phases = [
+    {color:'var(--accent)',pct:20,label:'Phase 1'},
+    {color:'var(--accent2)',pct:20,label:'Phase 2'},
+    {color:'var(--accent3)',pct:20,label:'Phase 3'},
+    {color:'var(--accent4)',pct:20,label:'Phase 4'}
+  ];
+  document.getElementById('journey-bar').innerHTML = phases.map(p=>`<div class="journey-seg" style="background:${p.color};opacity:0.4" title="${p.label}"></div>`).join('');
+}
+
+// ============ PHASES ============
+const phaseColors = ['var(--accent)','var(--accent2)','var(--accent3)','var(--accent4)'];
+const phaseBgs = ['rgba(124,106,247,0.1)','rgba(94,196,168,0.1)','rgba(242,166,90,0.1)','rgba(224,107,139,0.1)'];
+
+function getDefaultPhases() {
+  return [
+    {
+      id:'p1', name:'Position Myself Before the Title', time:'Now → Year 1', color:0,
+      tasks: [
+        {id:uid(),text:'Create a Skills & Experience Inventory: list every HR Generalist task from your 4 years and rewrite each one in EX/OD language',done:false},
+        {id:uid(),text:'Schedule a meeting with your manager within 30 days to formally propose a culture/EX scope expansion — bring 3 specific initiatives tied to business outcomes',done:false},
+        {id:uid(),text:'In your first 60 days as ERG Program Manager, submit your annual program plan using your 3 lenses (Visibility, Development, Trust & Belonging) as the organizing framework',done:false},
+        {id:uid(),text:'For every ERG program: write a one-sentence intended outcome BEFORE planning a single logistic — this trains you to lead with impact, not execution',done:false},
+        {id:uid(),text:'After each ERG event: build a simple before/after document — what problem did this solve, who did it reach, what changed. This is your first culture intervention portfolio',done:false},
+        {id:uid(),text:'Rewrite your LinkedIn headline and summary this month — lead with "culture and employee experience professional." Have your Talent Management mentor review it before publishing',done:false},
+        {id:uid(),text:'Apply your Interpersonal Communications course to ERG facilitation — after each call or presentation, write one sentence: what landed well, what you would change',done:false},
+        {id:uid(),text:'Use your Introduction to Ethics course to write a one-page personal essay: "What does it mean for a Fortune 10 company to actually earn employee trust?" — this is the seed of your consulting philosophy',done:false},
+        {id:uid(),text:'Start your Impact Log this week — update every Friday. Every time you help someone feel more seen, supported, or clear at work, write what you did, who it affected, and what changed',done:false},
+        {id:uid(),text:'Have an explicit career conversation with your Talent Management mentor — share your 5-year ladder, ask her to introduce you to 1 person per quarter from EX, OD, or Inclusion teams',done:false},
+        {id:uid(),text:'By month 6, identify one broken process at your company and write a 1-page improvement proposal — observe the problem, diagnose root cause, recommend solution, project impact',done:false},
+        {id:uid(),text:'Join one HR/EX professional community by month 3 — SHRM, People Geeks, or EX World. Introduce yourself using your EX-forward identity, not your EA title',done:false}
+      ]
+    },
+    {
+      id:'p2', name:'Proof That Can\'t Be Ignored', time:'Year 1–2', color:1,
+      tasks: [
+        {id:uid(),text:'Compile your completed ERG programs into a formal Impact Report — attendance, feedback themes, 2–3 direct quotes. Present to your ERG manager and ask if it can be shared with the EX or Inclusion team',done:false},
+        {id:uid(),text:'Use your Career Planning & Management course to build a real strategic artifact — map your current role to OD Coordinator or OE Analyst, identify 3 skill gaps, create an 18-month plan to close each',done:false},
+        {id:uid(),text:'Use your Dynamic Interactions & Professional Presence course — practice presenting ERG outcomes as a consultant would: structured, data-informed, outcome-first. Record a 3-minute summary once a month',done:false},
+        {id:uid(),text:'Study OD frameworks in context — apply McKinsey\'s 7S to your Fortune 10 company and Lewin\'s Change Model to one culture shift you\'ve observed. Write 1–2 pages each. These become portfolio pieces',done:false},
+        {id:uid(),text:'Use Introductory Psychology — map Maslow, Herzberg, and Self-Determination Theory to your company\'s culture. Write one page on how each shows up or fails to in your org',done:false},
+        {id:uid(),text:'Use Introductory Sociology — study group dynamics and norms. Apply to ERG community-building. Write one observation connecting class to your ERG members',done:false},
+        {id:uid(),text:'Find 3 people on LinkedIn who went from HR/People roles into independent OD or culture consulting. Study their path, send each a personal note. Ask nothing yet. Just open the door',done:false},
+        {id:uid(),text:'Design and run one ERG program that includes a culture or belonging diagnostic — a listening session, pulse survey, or structured conversation. Write a summary of what you heard and recommend',done:false},
+        {id:uid(),text:'Build your Proof of Impact document — a living record of every culture win, program outcome, and feedback that proves you made someone feel seen. Update every two weeks',done:false},
+        {id:uid(),text:'Tailor your resume toward OD Coordinator and OE Analyst — replace "coordinated" with "designed and led," "supported" with "owned." Add: OD, culture strategy, employee listening, program design, change facilitation',done:false},
+        {id:uid(),text:'Build one new relationship per quarter beyond your mentor — someone on the EX team and someone on OD or Inclusion. Use your ERG role as the natural reason to reach out',done:false},
+        {id:uid(),text:'Connect your Org Behavior coursework to real job postings — pull 3 OD Coordinator or OE Analyst descriptions and write next to each requirement where you already have evidence',done:false}
+      ]
+    },
+    {
+      id:'p3', name:'Land the Role', time:'Year 2–3', color:2,
+      tasks: [
+        {id:uid(),text:'Write your internal positioning statement — a clear, confident 3-paragraph document: who you are professionally, what you\'ve built in 2 years, and why you are the right person for an OD or People & Culture Specialist role. Share with mentor before any internal conversations',done:false},
+        {id:uid(),text:'Draft your formal transition case — a 1-page business case including: ERG outcomes with data, culture results, degree progress, OD framework knowledge, and specific value you\'d add. Bring to your next performance review',done:false},
+        {id:uid(),text:'Map every internal decision-maker who can influence your role change — who has authority to create OD/EX roles, who influences them, who already knows your work. Build a 90-day plan to deepen 3 relationships',done:false},
+        {id:uid(),text:'Use your Social Psychology course to build your Culture Diagnostic Framework — how you assess belonging barriers, group behavior, and cultural perception. Save in Consulting IP Vault — your first proprietary consulting tool',done:false},
+        {id:uid(),text:'Connect every completed course to specific job descriptions you\'re targeting — write one paragraph explaining how your Org Behavior degree makes you stronger than someone without that academic foundation',done:false},
+        {id:uid(),text:'Have an explicit sponsor conversation — ask directly: "I\'m working toward an OD or EX role in the next 12–18 months. Would you be willing to advocate for me when the right opportunity comes up?"',done:false},
+        {id:uid(),text:'Practice consulting framing once a month: pick a people or culture problem you observed and write a brief — presenting problem, root cause, recommendation, what success looks like. By end of phase: 12 mini case studies',done:false},
+        {id:uid(),text:'Apply for at least 2 internal roles in OD, EX, Inclusion, or Talent — even at 80% readiness. Use every interview as intelligence: what are they looking for, what language do they use, what gaps do they identify',done:false},
+        {id:uid(),text:'Start building your side practice — offer pro bono OD or culture consulting to a nonprofit or small business. Design a belonging assessment. First external client experience and a case study you fully own',done:false},
+        {id:uid(),text:'Define your niche in one clear sentence at the top of your Consulting IP Vault — refine monthly until it sounds exactly like you',done:false}
+      ]
+    },
+    {
+      id:'p4', name:'Own the Room', time:'Year 3–5', color:3,
+      tasks: [
+        {id:uid(),text:'On your first day in an OD or Culture role — open your Consulting IP Vault and start adding every framework, tool, survey instrument, workshop agenda, and change plan you create. Document the thinking behind each one',done:false},
+        {id:uid(),text:'Use your Org Behavior graduation (January 2029) as a formal re-launch moment — update every professional profile, write a LinkedIn post about what the degree taught you. This is a visibility moment. Use it',done:false},
+        {id:uid(),text:'Take on a change management project end-to-end — own the full lifecycle from stakeholder assessment through implementation to post-change evaluation. Document every phase. This is your flagship consulting case study',done:false},
+        {id:uid(),text:'Pursue Prosci or CCMP change management certification by Year 4 — time it with a real change project. Ask your Fortune 10 employer to sponsor it explicitly',done:false},
+        {id:uid(),text:'Speak at one external event by Year 4 — an HR conference, DEI summit, ERG network event, or university panel. Your topic: how large organizations can translate what employees feel into what leaders can act on',done:false},
+        {id:uid(),text:'Write your consulting offer as a formal document — service menu, methodology, ideal client profile, pricing model, differentiation. Not a website yet — a thinking document that forces you to articulate your value clearly enough to sell it',done:false},
+        {id:uid(),text:'Build a pipeline of 3–5 warm consulting prospects before you go independent — when you announce you\'re available, someone should already know what you do and want it',done:false},
+        {id:uid(),text:'Establish a feedback loop in your role — quarterly culture or EX metrics that leadership reviews. Proves you can run the diagnostic-to-action cycle clients pay you to replicate',done:false},
+        {id:uid(),text:'Define your personal leadership brand — what are you known for? Write it from the perspective of someone introducing you at a conference. Make it true, specific, and distinctly you',done:false},
+        {id:uid(),text:'Complete one full culture transformation project — from diagnosis through intervention design to measuring behavioral change. Detailed enough to present as a keynote. Your consulting signature',done:false}
+      ]
+    }
+  ];
+}
+
+function renderPhases() {
+  const grid = document.getElementById('phase-grid');
+  if(!db.phases||!db.phases.length) db.phases = getDefaultPhases();
+  grid.innerHTML = db.phases.map((ph,pi)=>{
+    const total = ph.tasks.length;
+    const done = ph.tasks.filter(t=>t.done).length;
+    const pct = total ? Math.round((done/total)*100) : 0;
+    const color = phaseColors[ph.color||pi%4];
+    const allDone = total>0 && done===total;
+    return `<div class="phase-card ${pi===0?'open':''}" id="phase-card-${ph.id}">
+      <div class="phase-header" onclick="togglePhase('${ph.id}')">
+        <div class="phase-badge" style="background:${phaseBgs[ph.color||pi%4]};color:${color};border:1px solid ${color}40">${allDone?'✓':pi+1}</div>
+        <div class="phase-header-text">
+          <div class="phase-name">Phase ${pi+1} — ${escHtml(ph.name)}</div>
+          <div class="phase-time">${escHtml(ph.time)}</div>
+        </div>
+        <span class="phase-chevron">▼</span>
+      </div>
+      <div class="phase-progress-bar">
+        <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:var(--muted);margin-bottom:4px"><span>${done}/${total} complete</span><span>${pct}%</span></div>
+        <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+      </div>
+      <div class="phase-body">
+        ${allDone?`<div class="phase-celebration" style="display:block">🎉 Phase complete! You built proof that can't be ignored.</div>`:''}
+        ${ph.tasks.map(t=>`
+          <div class="task-item" id="task-${t.id}">
+            <div class="task-cb ${t.done?'checked':''}" style="${t.done?`background:${color}`:'border-color:'+color+'40'}" onclick="toggleTask('${ph.id}','${t.id}')"></div>
+            <span class="task-text ${t.done?'done':''}" id="ttext-${t.id}">${escHtml(t.text)}</span>
+            <div class="task-actions">
+              <button class="act-btn" onclick="editTask('${ph.id}','${t.id}')" title="Edit">✎</button>
+              <button class="act-btn del" onclick="delTask('${ph.id}','${t.id}')" title="Delete">✕</button>
+            </div>
+          </div>`).join('')}
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%" onclick="openAddTask('${ph.id}')">+ Add your own goal</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function togglePhase(id) {
+  const card = document.getElementById('phase-card-'+id);
+  card.classList.toggle('open');
+}
+
+function toggleTask(phId, tId) {
+  const ph = db.phases.find(p=>p.id===phId); if(!ph) return;
+  const t = ph.tasks.find(x=>x.id===tId); if(!t) return;
+  t.done = !t.done;
+  save('phases'); renderPhases();
+}
+
+function delTask(phId, tId) {
+  const ph = db.phases.find(p=>p.id===phId); if(!ph) return;
+  ph.tasks = ph.tasks.filter(x=>x.id!==tId);
+  save('phases'); renderPhases();
+}
+
+function editTask(phId, tId) {
+  const ph = db.phases.find(p=>p.id===phId); if(!ph) return;
+  const t = ph.tasks.find(x=>x.id===tId); if(!t) return;
+  const el = document.getElementById('ttext-'+tId);
+  const original = el.textContent;
+  el.innerHTML = `<input class="task-edit-input" value="${escHtml(original)}" id="tedit-${tId}">`;
+  const inp = document.getElementById('tedit-'+tId);
+  inp.focus(); inp.select();
+  inp.addEventListener('keydown', e => {
+    if(e.key==='Enter'){ t.text=inp.value; save('phases'); renderPhases(); }
+    if(e.key==='Escape'){ el.textContent=original; }
+  });
+}
+
+function openAddTask(phId) {
+  document.getElementById('addtask-phase').value = phId;
+  document.getElementById('addtask-text').value = '';
+  openModal('modal-addtask');
+}
+
+function saveCustomTask() {
+  const text = document.getElementById('addtask-text').value.trim(); if(!text) return;
+  const phId = document.getElementById('addtask-phase').value;
+  const ph = db.phases.find(p=>p.id===phId); if(!ph) return;
+  ph.tasks.push({ id:uid(), text, done:false });
+  save('phases'); closeModal('modal-addtask'); renderPhases();
+}
+
+// ============ ERG ============
+function saveErg() {
+  const name=document.getElementById('erg-name').value.trim(); if(!name)return;
+  db.erg.unshift({ id:uid(), name, lens:document.getElementById('erg-lens').value, status:document.getElementById('erg-status').value, outcome:document.getElementById('erg-outcome').value, date:document.getElementById('erg-date').value, budget:document.getElementById('erg-budget').value, reach:document.getElementById('erg-reach').value, feedback:document.getElementById('erg-feedback').value });
+  save('erg'); closeModal('modal-erg');
+  document.getElementById('erg-name').value=''; document.getElementById('erg-outcome').value=''; document.getElementById('erg-budget').value=''; document.getElementById('erg-reach').value=''; document.getElementById('erg-feedback').value='';
+  renderErg();
+}
+
+function renderErg() {
+  const lens = { 'Visibility':[], 'Development':[], 'Trust & Belonging':[] };
+  db.erg.forEach(e=>(lens[e.lens]||lens['Visibility']).push(e));
+  const total = db.erg.length;
+  document.getElementById('erg-total').textContent = total;
+  document.getElementById('erg-vis').textContent = lens['Visibility'].length;
+  document.getElementById('erg-dev').textContent = lens['Development'].length;
+  document.getElementById('erg-tb').textContent = lens['Trust & Belonging'].length;
+
+  const renderCol = (items, elId) => {
+    document.getElementById(elId).innerHTML = items.length ? items.map(e=>`
+      <div class="erg-card">
+        <div class="ec-title">${escHtml(e.name)}</div>
+        ${e.outcome?`<div class="ec-outcome">"${escHtml(e.outcome)}"</div>`:''}
+        <div class="ec-meta">${statusTag(e.status)}${e.date?`<span style="color:var(--muted)">${fmtDate(e.date)}</span>`:''} ${e.reach?`<span class="tag tag-accent2">${escHtml(e.reach)} reached</span>`:''} ${e.budget?`<span class="tag tag-muted">$${e.budget}</span>`:''}</div>
+        ${e.feedback?`<div style="font-size:0.73rem;color:var(--muted);margin-top:6px;line-height:1.4">${escHtml(e.feedback)}</div>`:''}
+        <div class="ec-actions">
+          <button class="act-btn" onclick="editErg('${e.id}')">✎</button>
+          <button class="act-btn del" onclick="delErg('${e.id}')">✕</button>
+        </div>
+      </div>`).join('') : '<div style="color:var(--muted);font-size:0.78rem">None yet.</div>';
+  };
+  renderCol(lens['Visibility'],'erg-vis-col');
+  renderCol(lens['Development'],'erg-dev-col');
+  renderCol(lens['Trust & Belonging'],'erg-tb-col');
+}
+
+function delErg(id){if(!confirm('Delete?'))return;db.erg=db.erg.filter(x=>x.id!==id);save('erg');renderErg();}
+function editErg(id){
+  const e=db.erg.find(x=>x.id===id);if(!e)return;
+  document.getElementById('erg-name').value=e.name;
+  document.getElementById('erg-lens').value=e.lens||'Visibility';
+  document.getElementById('erg-status').value=e.status||'Idea';
+  document.getElementById('erg-outcome').value=e.outcome||'';
+  document.getElementById('erg-date').value=e.date||'';
+  document.getElementById('erg-budget').value=e.budget||'';
+  document.getElementById('erg-reach').value=e.reach||'';
+  document.getElementById('erg-feedback').value=e.feedback||'';
+  db.erg=db.erg.filter(x=>x.id!==id);
+  openModal('modal-erg');
+}
+
+// ============ IMPACT LOG (AI-POWERED) ============
+const IMP_CATS = ['ERG','Culture Work','People Made to Feel Seen','Process Improved','Leadership Visibility','Career Development','Degree & Learning Applied','Relationship Built'];
+
+// Track which source items have already been saved to the impact log
+function getSavedSourceIds() {
+  return new Set(db.impact.map(e => e.sourceId).filter(Boolean));
+}
+
+// Collect all source items not yet in the impact log
+function getUnloggedItems() {
+  const saved = getSavedSourceIds();
+  const items = [];
+
+  db.acc.forEach(a => {
+    if (!saved.has('acc-' + a.id)) {
+      items.push({
+        sourceId: 'acc-' + a.id,
+        sourceType: 'Accomplishment',
+        raw: [a.title, a.impact, a.cat, a.stake ? 'Stakeholders: ' + a.stake : ''].filter(Boolean).join(' | '),
+        date: a.date,
+        label: a.title
+      });
+    }
+  });
+
+  db.proj.forEach(p => {
+    if (!saved.has('proj-' + p.id) && (p.status === 'Completed' || p.status === 'In Progress')) {
+      items.push({
+        sourceId: 'proj-' + p.id,
+        sourceType: 'Project',
+        raw: [p.name, p.desc, 'Category: ' + p.cat, 'Status: ' + p.status, p.prog ? p.prog + '% complete' : ''].filter(Boolean).join(' | '),
+        date: p.deadline,
+        label: p.name
+      });
+    }
+  });
+
+  db.erg.forEach(e => {
+    if (!saved.has('erg-' + e.id)) {
+      items.push({
+        sourceId: 'erg-' + e.id,
+        sourceType: 'ERG Program',
+        raw: [e.name, 'Lens: ' + e.lens, 'Outcome: ' + e.outcome, e.feedback ? 'Impact: ' + e.feedback : '', e.reach ? 'Reach: ' + e.reach : ''].filter(Boolean).join(' | '),
+        date: e.date,
+        label: e.name
+      });
+    }
+  });
+
+  return items;
+}
+
+async function generateAllImpact() {
+  const items = getUnloggedItems();
+  const btn = document.getElementById('gen-all-btn');
+
+  if (!items.length) {
+    document.getElementById('impact-queue-wrap').style.display = 'none';
+    document.getElementById('impact-empty-queue').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('impact-empty-queue').style.display = 'none';
+  document.getElementById('impact-queue-wrap').style.display = 'block';
+  document.getElementById('impact-queue').innerHTML = '';
+  document.getElementById('queue-count-badge').textContent = '0';
+  btn.disabled = true;
+  btn.textContent = '✦ Generating…';
+
+  // Show skeleton cards while loading
+  document.getElementById('impact-queue').innerHTML = items.map((item, i) => `
+    <div class="impact-suggestion-card" id="sug-${i}" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;opacity:0.6;">
+      <div style="font-size:0.68rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">${item.sourceType} · <span style="color:var(--text)">${escHtml(item.label)}</span></div>
+      <div style="color:var(--muted);font-size:0.82rem;display:flex;align-items:center;gap:8px;"><span class="spin-dot">◌</span> Reframing…</div>
+    </div>`).join('');
+
+  // Process each item individually so results appear as they come in
+  let successCount = 0;
+  await Promise.all(items.map(async (item, i) => {
+    try {
+      const result = await reframeWithAI(item);
+      renderSuggestionCard(i, item, result);
+      successCount++;
+      document.getElementById('queue-count-badge').textContent = successCount;
+    } catch(e) {
+      document.getElementById('sug-' + i).innerHTML = `
+        <div style="font-size:0.68rem;color:var(--muted);margin-bottom:4px;">${item.sourceType} · ${escHtml(item.label)}</div>
+        <div style="color:var(--accent4);font-size:0.78rem;">Could not generate — try again later.</div>`;
+    }
+  }));
+
+  btn.disabled = false;
+  btn.textContent = '✦ Generate from My Work';
+}
+
+async function reframeWithAI(item) {
+  const prompt = `You are an expert career coach and organizational development consultant helping a professional reframe their work in high-impact language.
+
+Context about this person:
+- Executive Assistant at a Fortune 10 healthcare company
+- 4 years HR Generalist experience (onboarding, employee engagement, employee relations)
+- Pivoting into Employee Experience (EX) and Organizational Development (OD)
+- ERG Program Manager for BOND (Black Organization for Networking and Development)
+- Enrolled in Psychology / Organizational Behavior degree, graduating January 2029
+- Consulting niche: "I help organizations understand how their employees truly feel at work — and design culture and belonging interventions that make work feel less heavy and more intentional."
+
+Source type: ${item.sourceType}
+Raw data: ${item.raw}
+Date: ${item.date || 'Not specified'}
+
+Your task: Generate a JSON object with these exact fields:
+- "reframe": A 1-2 sentence outcome-first restatement. Lead with impact and scale, not tasks. Use strong verbs (designed, led, owned, launched, facilitated, built, delivered). Quantify where possible. Sound like a consultant describing their work, not an employee describing their duties.
+- "review": A 1-2 sentence performance review or resume bullet. Past tense, action-first, outcome-focused. This should be copy-paste ready for a performance review, LinkedIn, or resume.
+- "cat": The single best category from this list — ERG, Culture Work, People Made to Feel Seen, Process Improved, Leadership Visibility, Career Development, Degree & Learning Applied, Relationship Built
+- "odRelevance": One sentence connecting this work to OD/EX consulting practice. How does this prove consulting readiness?
+
+Return ONLY valid JSON. No markdown, no explanation, no backticks.`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  const data = await response.json();
+  const text = data.content.map(b => b.text || '').join('');
+  const clean = text.replace(/```json|```/g, '').trim();
+  return JSON.parse(clean);
+}
+
+function renderSuggestionCard(i, item, result) {
+  const el = document.getElementById('sug-' + i);
+  if (!el) return;
+  el.style.opacity = '1';
+  el.style.borderColor = 'rgba(124,106,247,0.3)';
+  el.innerHTML = `
+    <div style="font-size:0.68rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+      <span class="tag tag-muted">${item.sourceType}</span>
+      <span style="color:var(--text)">${escHtml(item.label)}</span>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div style="font-size:0.68rem;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;font-weight:600;">Reframe</div>
+      <div style="font-size:0.85rem;line-height:1.6;color:var(--text)">${escHtml(result.reframe)}</div>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div style="font-size:0.68rem;color:var(--accent3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;font-weight:600;">Performance Review / Resume Bullet</div>
+      <div style="font-size:0.82rem;line-height:1.6;color:var(--accent3);font-style:italic">"${escHtml(result.review)}"</div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.68rem;color:var(--accent2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;font-weight:600;">OD/EX Relevance</div>
+      <div style="font-size:0.78rem;color:var(--muted);line-height:1.5">${escHtml(result.odRelevance)}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span class="tag tag-accent">${result.cat}</span>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" onclick="dismissSuggestion(${i})">Dismiss</button>
+      <button class="btn btn-primary btn-sm" onclick="saveSuggestion(${i}, ${JSON.stringify(item).replace(/"/g,'&quot;')}, ${JSON.stringify(result).replace(/"/g,'&quot;')})">Save to Log</button>
+    </div>`;
+}
+
+function saveSuggestion(i, item, result) {
+  db.impact.unshift({
+    id: uid(),
+    sourceId: item.sourceId,
+    sourceType: item.sourceType,
+    raw: item.label,
+    reframe: result.reframe,
+    review: result.review,
+    cat: result.cat,
+    odRelevance: result.odRelevance,
+    date: item.date || new Date().toISOString().slice(0,10)
+  });
+  save('impact');
+  document.getElementById('sug-' + i).style.display = 'none';
+  const remaining = document.querySelectorAll('.impact-suggestion-card:not([style*="display: none"])').length;
+  document.getElementById('queue-count-badge').textContent = remaining;
+  if (!remaining) {
+    document.getElementById('impact-queue-wrap').style.display = 'none';
+    document.getElementById('impact-empty-queue').style.display = 'block';
+  }
+  renderImpact();
+}
+
+function saveAllSuggestions() {
+  document.querySelectorAll('.impact-suggestion-card').forEach((el, i) => {
+    if (el.style.display !== 'none') {
+      const saveBtn = el.querySelector('.btn-primary');
+      if (saveBtn) saveBtn.click();
+    }
+  });
+}
+
+function dismissSuggestion(i) {
+  const el = document.getElementById('sug-' + i);
+  if (el) el.style.display = 'none';
+  const remaining = document.querySelectorAll('.impact-suggestion-card:not([style*="display: none"])').length;
+  document.getElementById('queue-count-badge').textContent = remaining;
+  if (!remaining) {
+    document.getElementById('impact-queue-wrap').style.display = 'none';
+    document.getElementById('impact-empty-queue').style.display = 'block';
+  }
+}
+
+function renderImpact() {
+  const el = document.getElementById('impact-list');
+  document.getElementById('impact-saved-count').textContent = db.impact.length;
+
+  el.innerHTML = db.impact.length ? db.impact.map(e => `
+    <div class="impact-entry">
+      ${e.sourceType ? `<div style="font-size:0.68rem;color:var(--muted);margin-bottom:4px;letter-spacing:0.04em;text-transform:uppercase">${e.sourceType}</div>` : ''}
+      <div class="ie-outcome">${escHtml(e.reframe)}</div>
+      ${e.review ? `<div class="ie-review">"${escHtml(e.review)}"</div>` : ''}
+      ${e.odRelevance ? `<div style="font-size:0.73rem;color:var(--muted);margin-top:4px;line-height:1.5">${escHtml(e.odRelevance)}</div>` : ''}
+      <div class="ie-meta" style="margin-top:6px;"><span class="tag tag-accent">${e.cat}</span>${e.date ? `<span>${fmtDate(e.date)}</span>` : ''}</div>
+      <div class="ie-actions">
+        <button class="act-btn" onclick="editImpact('${e.id}')">✎</button>
+        <button class="act-btn del" onclick="delImpact('${e.id}')">✕</button>
+      </div>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:0.82rem;padding:12px 0">Click "Generate from My Work" above to auto-populate this log.</div>';
+
+  // Chart
+  const counts = {};
+  IMP_CATS.forEach(c => counts[c] = 0);
+  db.impact.forEach(e => { if (counts[e.cat] !== undefined) counts[e.cat]++; });
+  const max = Math.max(...Object.values(counts), 1);
+  document.getElementById('impact-chart').innerHTML = IMP_CATS.map(c => `
+    <div class="vis-bar-row">
+      <div class="vis-bar-label" style="width:180px">${c}</div>
+      <div class="vis-bar-outer"><div class="vis-bar-inner" style="width:${(counts[c]/max)*100}%;background:var(--accent2)"></div></div>
+      <div class="vis-bar-count">${counts[c]}</div>
+    </div>`).join('');
+}
+
+function delImpact(id) {
+  if (!confirm('Delete this entry?')) return;
+  db.impact = db.impact.filter(x => x.id !== id);
+  save('impact'); renderImpact();
+}
+
+function editImpact(id) {
+  const e = db.impact.find(x => x.id === id); if (!e) return;
+  document.getElementById('imp-edit-reframe').value = e.reframe || '';
+  document.getElementById('imp-edit-cat').value = e.cat || 'ERG';
+  document.getElementById('imp-edit-review').value = e.review || '';
+  document.getElementById('imp-edit-id').value = id;
+  openModal('modal-impact-edit');
+}
+
+function saveImpactEdit() {
+  const id = document.getElementById('imp-edit-id').value;
+  const e = db.impact.find(x => x.id === id); if (!e) return;
+  e.reframe = document.getElementById('imp-edit-reframe').value;
+  e.cat = document.getElementById('imp-edit-cat').value;
+  e.review = document.getElementById('imp-edit-review').value;
+  save('impact'); closeModal('modal-impact-edit'); renderImpact();
+}
+
+// ============ NETWORK ============
+function saveNet() {
+  const name=document.getElementById('net-name').value.trim(); if(!name)return;
+  db.network.unshift({ id:uid(), name, title:document.getElementById('net-title').value, type:document.getElementById('net-type').value, warmth:document.getElementById('net-warmth').value, last:document.getElementById('net-last').value, notes:document.getElementById('net-notes').value });
+  save('network'); closeModal('modal-net');
+  document.getElementById('net-name').value=''; document.getElementById('net-title').value=''; document.getElementById('net-notes').value='';
+  renderNetwork();
+}
+
+function renderNetwork() {
+  const mentors = db.network.filter(n=>['Mentor','Sponsor'].includes(n.type));
+  const erg = db.network.filter(n=>n.type==='ERG & Internal Ally');
+  const exod = db.network.filter(n=>['EX & OD Peer','LinkedIn Target','Consulting Connection'].includes(n.type));
+  const nurture = db.network.filter(n=>n.warmth==='❄️ Cold' || n.type==='To Nurture');
+
+  document.getElementById('net-total').textContent = db.network.length;
+  document.getElementById('net-ment').textContent = mentors.length;
+  document.getElementById('net-exod').textContent = exod.length;
+  document.getElementById('net-nurture').textContent = nurture.length;
+
+  const renderCards = (items, elId) => {
+    document.getElementById(elId).innerHTML = items.length ? items.map(n=>`
+      <div class="net-card">
+        ${avatar(n.name)}
+        <div style="flex:1;min-width:0">
+          <div class="nc-name">${escHtml(n.name)}</div>
+          <div class="nc-title">${escHtml(n.title||'')}</div>
+          <div class="nc-meta">${warmthBadge(n.warmth)}<span class="tag tag-muted" style="font-size:0.65rem">${n.type}</span>${n.last?`<span style="font-size:0.68rem;color:var(--muted)">${fmtDate(n.last)}</span>`:''}</div>
+          ${n.notes?`<div style="font-size:0.72rem;color:var(--muted);margin-top:4px">${escHtml(n.notes)}</div>`:''}
+        </div>
+        <div class="nc-actions">
+          <button class="act-btn" onclick="editNet('${n.id}')">✎</button>
+          <button class="act-btn del" onclick="delNet('${n.id}')">✕</button>
+        </div>
+      </div>`).join('') : '<div style="color:var(--muted);font-size:0.78rem">None yet.</div>';
+  };
+  renderCards(mentors,'net-mentors');
+  renderCards(erg,'net-erg');
+  renderCards(exod,'net-exod-list');
+}
+
+function delNet(id){if(!confirm('Delete?'))return;db.network=db.network.filter(x=>x.id!==id);save('network');renderNetwork();}
+function editNet(id){
+  const n=db.network.find(x=>x.id===id);if(!n)return;
+  document.getElementById('net-name').value=n.name;
+  document.getElementById('net-title').value=n.title||'';
+  document.getElementById('net-type').value=n.type||'Mentor';
+  document.getElementById('net-warmth').value=n.warmth||'🆕 Just connected';
+  document.getElementById('net-last').value=n.last||'';
+  document.getElementById('net-notes').value=n.notes||'';
+  db.network=db.network.filter(x=>x.id!==id);
+  openModal('modal-net');
+}
+
+// ============ CONSULTING IP ============
+const IP_TYPES = { 'Framework':'ip-frameworks', 'Survey & Diagnostic Tool':'ip-surveys', 'Workshop Design':'ip-workshops', 'Methodology Note':'ip-methodology', 'Consulting Brief':'ip-methodology', 'Program Blueprint':'ip-workshops' };
+
+function saveIp() {
+  const title=document.getElementById('ip-title').value.trim(); if(!title)return;
+  db.ip.unshift({ id:uid(), title, type:document.getElementById('ip-type').value, date:document.getElementById('ip-date').value, desc:document.getElementById('ip-desc').value, source:document.getElementById('ip-source').value });
+  save('ip'); closeModal('modal-ip');
+  document.getElementById('ip-title').value=''; document.getElementById('ip-desc').value=''; document.getElementById('ip-source').value='';
+  renderIp();
+}
+
+function renderIp() {
+  const sections = { 'ip-frameworks':[], 'ip-surveys':[], 'ip-workshops':[], 'ip-methodology':[] };
+  db.ip.forEach(e=>{
+    const key = IP_TYPES[e.type] || 'ip-methodology';
+    sections[key].push(e);
+  });
+  Object.entries(sections).forEach(([elId, items])=>{
+    document.getElementById(elId).innerHTML = items.length ? items.map(e=>`
+      <div class="ip-card">
+        <div class="ip-title">${escHtml(e.title)}</div>
+        <div class="ip-meta"><span class="tag tag-accent">${e.type}</span>${e.date?`<span>${fmtDate(e.date)}</span>`:''} ${e.source?`<span>via ${escHtml(e.source)}</span>`:''}</div>
+        ${e.desc?`<div class="ip-desc">${escHtml(e.desc)}</div>`:''}
+        <div class="ip-actions">
+          <button class="act-btn" onclick="editIp('${e.id}')">✎</button>
+          <button class="act-btn del" onclick="delIp('${e.id}')">✕</button>
+        </div>
+      </div>`).join('') : '<div style="color:var(--muted);font-size:0.78rem;padding:8px 0">None yet.</div>';
+  });
+}
+
+function delIp(id){if(!confirm('Delete?'))return;db.ip=db.ip.filter(x=>x.id!==id);save('ip');renderIp();}
+function editIp(id){
+  const e=db.ip.find(x=>x.id===id);if(!e)return;
+  document.getElementById('ip-title').value=e.title;
+  document.getElementById('ip-type').value=e.type||'Framework';
+  document.getElementById('ip-date').value=e.date||'';
+  document.getElementById('ip-desc').value=e.desc||'';
+  document.getElementById('ip-source').value=e.source||'';
+  db.ip=db.ip.filter(x=>x.id!==id);
+  openModal('modal-ip');
+}
+
+// ============ DASHBOARD ============
+function renderDashboard() {
+  document.getElementById('ds-projects').textContent = db.proj.filter(p=>p.status==='Completed').length;
+  document.getElementById('ds-erg').textContent = db.erg.filter(e=>e.status==='Completed').length;
+  document.getElementById('ds-impact').textContent = db.impact.length;
+  document.getElementById('ds-vis').textContent = db.vis.length;
+
+  // Active projects
+  const active = db.proj.filter(p=>p.status==='In Progress').slice(0,3);
+  document.getElementById('dash-projects').innerHTML = active.length ? active.map(p=>{
+    const pct=Math.min(100,p.prog||0);
+    return `<div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:4px"><span>${escHtml(p.name)}</span><span style="color:var(--muted)">${pct}%</span></div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%;background:var(--accent)"></div></div>
+    </div>`;}).join('') : '<div style="color:var(--muted);font-size:0.82rem">No active projects yet.</div>';
+
+  // Recent accomplishments
+  const recentAcc = db.acc.slice(0,3);
+  document.getElementById('dash-acc-preview').innerHTML = recentAcc.length ? recentAcc.map(a=>`
+    <div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--accent);font-size:1rem;margin-top:1px">★</span>
+      <div><div style="font-size:0.82rem">${escHtml(a.title)}</div><div style="font-size:0.7rem;color:var(--muted)">${a.cat}</div></div>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:0.82rem">No accomplishments yet.</div>';
+
+  // Upcoming events
+  const today = new Date().toISOString().slice(0,10);
+  const upcoming = db.meet.filter(m=>m.date>=today).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3);
+  document.getElementById('dash-events').innerHTML = upcoming.length ? upcoming.map(m=>`
+    <div style="display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+      ${dateBox(m.date)}
+      <div><div style="font-size:0.82rem">${escHtml(m.title)}</div><div style="font-size:0.7rem;color:var(--muted)">${m.type} · ${m.role}</div></div>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:0.82rem">No upcoming events.</div>';
+
+  renderSkills();
+}
+
+// ============ EXPORT / IMPORT ============
+function exportBackup() {
+  const data = JSON.stringify(db, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `career-dashboard-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function importBackup(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      Object.assign(db, imported);
+      for (const [k, key] of Object.entries(KEYS)) {
+        if(db[k]) await storeSet(key, db[k]);
+      }
+      renderAll(); showSaved();
+      alert('Backup imported successfully!');
+    } catch(err) { alert('Invalid backup file.'); }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ============ RECOGNITION WALL ============
+function saveRec() {
+  const who = document.getElementById('re-who').value.trim();
+  if (!who) return;
+  const areas = [...document.querySelectorAll('#re-areas-wrap .ms-opt.sel')].map(e => e.dataset.val);
+  db.recs.push({
+    id: uid(),
+    who,
+    role: document.getElementById('re-role').value,
+    msg: document.getElementById('re-msg').value,
+    how: document.getElementById('re-how').value,
+    date: document.getElementById('re-d').value,
+    aud: document.getElementById('re-aud').value,
+    tenet: document.getElementById('re-tenet').value,
+    ptenet: document.getElementById('re-ptenet').value,
+    areas
+  });
+  save('recs');
+  closeModal('modal-rec');
+  ['re-who','re-role','re-msg','re-d','re-aud'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('re-tenet').value = '';
+  document.querySelectorAll('#re-areas-wrap .ms-opt').forEach(e => e.classList.remove('sel'));
+  renderRec();
+}
+
+function renderRec() {
+  const el = document.getElementById('rec-wall'); if (!el) return;
+
+  const tot = document.getElementById('rec-total'); if(tot) tot.textContent = db.recs.length;
+  const tb = document.getElementById('rec-tb'); if(tb) tb.textContent = db.recs.filter(r => r.how === 'TrueBlue').length;
+  const lead = document.getElementById('rec-lead');
+  if (lead) {
+    const leaderTitles = ['VP','SVP','EVP','Chief','Director','Head','President','CHRO','CEO','CFO','COO'];
+    lead.textContent = db.recs.filter(r => r.role && leaderTitles.some(t => r.role.includes(t))).length;
+  }
+
+  if (!db.recs.length) {
+    el.innerHTML = '<div style="padding:32px;background:var(--card);border:1px solid var(--border);border-radius:14px;text-align:center;color:var(--muted);font-size:0.82rem;"><div style="font-size:28px;margin-bottom:10px">🌟</div>Log your first recognition moment — a TrueBlue, a shoutout, a compliment that mattered</div>';
+    return;
+  }
+
+  const avColors = (i) => ['rgba(124,106,247,.25)','rgba(94,196,168,.25)','rgba(242,166,90,.25)','rgba(224,107,139,.25)'][i % 4];
+  const avText = (n) => n.trim().split(' ').map(w => w[0]||'').join('').toUpperCase().slice(0, 2);
+  const howBadge = { 'Meeting (Teams or In-Person)':'📍 Meeting', 'TrueBlue':'🏅 TrueBlue', 'LinkedIn':'💼 LinkedIn', 'Word of Mouth':'💬 Word of Mouth' };
+  const areaColors = { 'Employee Experience':'accent2', 'Culture & Belonging':'accent', 'Organizational Development':'accent3', 'Program Design & Execution':'accent4', 'Leadership & Executive Support':'muted' };
+
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">` +
+    [...db.recs].reverse().map((r, i) => `
+      <div class="rw-card">
+        <span class="rw-del" onclick="delRec('${r.id}')">✕</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:32px;height:32px;border-radius:50%;background:${avColors(i)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0">${avText(r.who)}</div>
+          <div><div class="rw-who">${escHtml(r.who)}</div><div class="rw-role">${escHtml(r.role||'')}</div></div>
+        </div>
+        ${r.msg ? `<div class="rw-msg">${escHtml(r.msg)}</div>` : ''}
+        <div class="rw-meta">
+          ${r.how ? `<span class="tag tag-muted">${howBadge[r.how]||r.how}</span>` : ''}
+          ${r.aud ? `<span class="tag tag-muted">👥 ${escHtml(r.aud)}</span>` : ''}
+          ${r.date ? `<span style="font-size:10px;color:var(--muted)">${fmtDate(r.date)}</span>` : ''}
+        </div>
+        ${(r.ptenet||r.tenet) ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">
+          ${r.ptenet ? `<span class="tag tag-accent" style="font-size:10px">✦ ${escHtml(r.ptenet)}</span>` : ''}
+          ${r.tenet ? `<span class="tag tag-accent3" style="font-size:10px">🏢 ${escHtml(r.tenet)}</span>` : ''}
+        </div>` : ''}
+        ${r.areas && r.areas.length ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${r.areas.map(a => `<span class="tag tag-${areaColors[a]||'muted'}" style="font-size:10px">${escHtml(a)}</span>`).join('')}</div>` : ''}
+      </div>`).join('') + '</div>';
+}
+
+function delRec(id) {
+  if (!confirm('Delete this recognition?')) return;
+  db.recs = db.recs.filter(r => r.id !== id);
+  save('recs'); renderRec();
+}
+
+// ============ UTILITIES ============
+function escHtml(str) {
+  if(!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderAll() {
+  renderDashboard();
+  renderAcc();
+  renderProj();
+  renderStake();
+  renderMeet();
+  renderVis();
+  renderRec();
+  renderCerts();
+  renderSkills();
+  renderLadder();
+  renderJourney();
+  renderPhases();
+  renderErg();
+  renderImpact();
+  renderNetwork();
+  renderIp();
+}
+
+// ============ INIT ============
+async function init() {
+  await loadAll();
+  renderAll();
+  setTimeout(() => {
+    const ls = document.getElementById('loading-screen');
+    ls.style.opacity = '0';
+    setTimeout(() => ls.style.display = 'none', 500);
+  }, 1500);
+}
+
+init();
+</script>
+</body>
+</html>
